@@ -20,19 +20,66 @@ app.secret_key = 'your-secret-key-change-in-production'  # Change this in produc
 # Database connection string
 DATABASE_URL = 'postgres://avnadmin:AVNS_Nw_acP_1et7TIqtP57w@pg-clement-clemo-d16a.i.aivencloud.com:11980/defaultdb?sslmode=require'
 
-# Parse database URL
-def get_db_connection():
-    """Create and return a database connection"""
-    try:
-        conn = psycopg2.connect(DATABASE_URL)
-        return conn
-    except Exception as e:
-        print(f"Database connection error: {e}")
-        raise
+# Connection pool for better performance
+from psycopg2 import pool
+_db_pool = None
 
-# Initialize database tables
+def init_db_pool():
+    """Initialize database connection pool"""
+    global _db_pool
+    try:
+        _db_pool = psycopg2.pool.SimpleConnectionPool(1, 5, DATABASE_URL)
+        if _db_pool:
+            print("Database connection pool created successfully!")
+    except Exception as e:
+        print(f"Error creating connection pool: {e}")
+        _db_pool = None
+
+def get_db_connection():
+    """Get a database connection from the pool"""
+    global _db_pool
+    if _db_pool is None:
+        init_db_pool()
+    
+    if _db_pool:
+        try:
+            return _db_pool.getconn()
+        except Exception as e:
+            print(f"Error getting connection from pool: {e}")
+            # Fallback to direct connection
+            return psycopg2.connect(DATABASE_URL)
+    else:
+        # Fallback to direct connection if pool fails
+        return psycopg2.connect(DATABASE_URL)
+
+def return_db_connection(conn):
+    """Return a connection to the pool"""
+    global _db_pool
+    if _db_pool:
+        try:
+            _db_pool.putconn(conn)
+        except Exception as e:
+            print(f"Error returning connection to pool: {e}")
+            try:
+                conn.close()
+            except:
+                pass
+    else:
+        try:
+            conn.close()
+        except:
+            pass
+
+# Initialize database tables (only run once)
+_db_initialized = False
+
 def init_db():
     """Initialize database tables if they don't exist"""
+    global _db_initialized
+    if _db_initialized:
+        return
+    
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -73,11 +120,14 @@ def init_db():
         
         conn.commit()
         cur.close()
-        conn.close()
+        _db_initialized = True
         print("Database initialized successfully!")
     except Exception as e:
         print(f"Error initializing database: {e}")
         raise
+    finally:
+        if conn:
+            return_db_connection(conn)
 
 # Initialize Flask-Login
 login_manager = LoginManager()
@@ -107,13 +157,13 @@ class User(UserMixin):
 @login_manager.user_loader
 def load_user(user_id):
     """Load user from database"""
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         cur.execute('SELECT id, username, email, is_admin FROM users WHERE id = %s AND is_active = TRUE', (user_id,))
         user_data = cur.fetchone()
         cur.close()
-        conn.close()
         
         if user_data:
             return User(
@@ -126,38 +176,48 @@ def load_user(user_id):
     except Exception as e:
         print(f"Error loading user: {e}")
         return None
+    finally:
+        if conn:
+            return_db_connection(conn)
 
 # Database helper functions
 def get_user_by_username(username):
     """Get user by username"""
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         cur.execute('SELECT * FROM users WHERE username = %s', (username,))
         user = cur.fetchone()
         cur.close()
-        conn.close()
         return user
     except Exception as e:
         print(f"Error getting user: {e}")
         return None
+    finally:
+        if conn:
+            return_db_connection(conn)
 
 def get_user_by_email(email):
     """Get user by email"""
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         cur.execute('SELECT * FROM users WHERE email = %s', (email,))
         user = cur.fetchone()
         cur.close()
-        conn.close()
         return user
     except Exception as e:
         print(f"Error getting user by email: {e}")
         return None
+    finally:
+        if conn:
+            return_db_connection(conn)
 
 def create_user(username, email, password_hash):
     """Create a new user"""
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -169,7 +229,6 @@ def create_user(username, email, password_hash):
         user_id = cur.fetchone()[0]
         conn.commit()
         cur.close()
-        conn.close()
         return user_id
     except psycopg2.IntegrityError as e:
         if 'username' in str(e):
@@ -180,9 +239,13 @@ def create_user(username, email, password_hash):
     except Exception as e:
         print(f"Error creating user: {e}")
         raise
+    finally:
+        if conn:
+            return_db_connection(conn)
 
 def create_password_reset_token(user_id):
     """Create a password reset token"""
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -202,14 +265,17 @@ def create_password_reset_token(user_id):
         
         conn.commit()
         cur.close()
-        conn.close()
         return token
     except Exception as e:
         print(f"Error creating reset token: {e}")
         raise
+    finally:
+        if conn:
+            return_db_connection(conn)
 
 def get_user_by_reset_token(token):
     """Get user by reset token if valid"""
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -221,47 +287,80 @@ def get_user_by_reset_token(token):
         ''', (token,))
         result = cur.fetchone()
         cur.close()
-        conn.close()
         return result
     except Exception as e:
         print(f"Error getting user by token: {e}")
         return None
+    finally:
+        if conn:
+            return_db_connection(conn)
 
 def mark_token_as_used(token):
     """Mark a reset token as used"""
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute('UPDATE password_reset_tokens SET used = TRUE WHERE token = %s', (token,))
         conn.commit()
         cur.close()
-        conn.close()
     except Exception as e:
         print(f"Error marking token as used: {e}")
+    finally:
+        if conn:
+            return_db_connection(conn)
 
 def update_user_password(user_id, password_hash):
     """Update user password"""
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute('UPDATE users SET password_hash = %s WHERE id = %s', (password_hash, user_id))
         conn.commit()
         cur.close()
-        conn.close()
     except Exception as e:
         print(f"Error updating password: {e}")
         raise
+    finally:
+        if conn:
+            return_db_connection(conn)
 
-# Load data
+# Cache for projects data (in-memory cache)
+_projects_cache = None
+_projects_cache_time = None
+CACHE_DURATION = 60  # Cache for 60 seconds
+
+# Load data with caching
 def load_projects():
+    global _projects_cache, _projects_cache_time
+    now = datetime.now()
+    
+    # Return cached data if still valid
+    if _projects_cache and _projects_cache_time:
+        if (now - _projects_cache_time).total_seconds() < CACHE_DURATION:
+            return _projects_cache
+    
+    # Load from file
     with open('projects.json', 'r', encoding='utf-8') as f:
-        return json.load(f)
+        _projects_cache = json.load(f)
+        _projects_cache_time = now
+        return _projects_cache
 
 def save_projects(projects):
+    global _projects_cache, _projects_cache_time
     with open('projects.json', 'w', encoding='utf-8') as f:
         json.dump(projects, f, indent=4, ensure_ascii=False)
+    # Invalidate cache
+    _projects_cache = projects
+    _projects_cache_time = datetime.now()
 
 @app.route('/')
+def index():
+    """Landing page"""
+    return render_template('index.html')
+
+@app.route('/dashboard')
 def dashboard():
     return render_template('dashboard.html')
 
@@ -543,7 +642,10 @@ def not_found(error):
     return render_template('404.html'), 404
 
 if __name__ == '__main__':
-    # Initialize database on startup
+    # Initialize database connection pool
+    init_db_pool()
+    
+    # Initialize database on startup (only once)
     try:
         init_db()
     except Exception as e:

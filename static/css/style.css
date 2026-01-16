@@ -8,6 +8,16 @@
     --danger-color: #dc3545;
 }
 
+/* Performance optimizations */
+img {
+    loading: lazy;
+}
+
+/* Loading spinner */
+.spinner-border {
+    animation: spinner-border 0.75s linear infinite;
+}
+
 /* Basemap Selector Styles */
 .basemap-selector {
     background: white;
