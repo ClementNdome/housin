@@ -39,3 +39,16 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.bak
+
+chan
+
+changes.md
+DEPLOYMENT.md
+QUICK_REFERENCE.md
+README_SECURITY_UPDATE.md
+DOCUMENTATION_INDEX.md
+SECURITY.md
+STATUS_COMPLETE.md
+VERIFICATION_REPORT.md
+.env.example
+.env
