@@ -31,6 +31,8 @@ Thumbs.db
 
 # Logs
 *.log
+logs/
+*.log.*
 
 # Database (if added later)
 *.db
@@ -39,8 +41,11 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.bak
+*.backup
 
-chan
+# Gunicorn
+gunicorn.pid
+*.pid
 
 changes.md
 DEPLOYMENT.md
