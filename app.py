@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request, redirect, url_for, flash
+from flask import Flask, render_template, jsonify, request, redirect, url_for, flash, session
 import json
 import os
 
@@ -40,60 +40,76 @@ def contact():
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
     if request.method == 'POST':
-        # Simple password check (for prototype)
-        password = request.form.get('password')
-        if password == 'admin123':  # Change this in production!
-            action = request.form.get('action')
-            
-            if action == 'add':
-                projects = load_projects()
-                new_project = {
-                    'boma_id': request.form.get('boma_id', 'N/A'),
-                    'name': request.form.get('name'),
-                    'status': request.form.get('status'),
-                    'units': int(request.form.get('units', 0)),
-                    'image': request.form.get('image', ''),
-                    'lat': float(request.form.get('lat', 0)),
-                    'lon': float(request.form.get('lon', 0)),
-                    'description': request.form.get('description', ''),
-                    'unit_types': request.form.get('unit_types', ''),
-                    'price_start': int(request.form.get('price_start', 0)) if request.form.get('price_start') else None
-                }
-                projects.append(new_project)
-                save_projects(projects)
-                flash('Project added successfully!', 'success')
-            
-            elif action == 'edit':
-                projects = load_projects()
-                project_id = int(request.form.get('project_id'))
-                projects[project_id].update({
-                    'boma_id': request.form.get('boma_id', 'N/A'),
-                    'name': request.form.get('name'),
-                    'status': request.form.get('status'),
-                    'units': int(request.form.get('units', 0)),
-                    'image': request.form.get('image', ''),
-                    'lat': float(request.form.get('lat', 0)),
-                    'lon': float(request.form.get('lon', 0)),
-                    'description': request.form.get('description', ''),
-                    'unit_types': request.form.get('unit_types', ''),
-                    'price_start': int(request.form.get('price_start', 0)) if request.form.get('price_start') else None
-                })
-                save_projects(projects)
-                flash('Project updated successfully!', 'success')
-            
-            elif action == 'delete':
-                projects = load_projects()
-                project_id = int(request.form.get('project_id'))
-                projects.pop(project_id)
-                save_projects(projects)
-                flash('Project deleted successfully!', 'success')
-            
+        action = request.form.get('action')
+        
+        # Handle login
+        if action == 'login':
+            password = request.form.get('password')
+            if password == 'admin123':  # Change this in production!
+                session['admin_logged_in'] = True
+                flash('Successfully logged in!', 'success')
+            else:
+                flash('Invalid password!', 'danger')
             return redirect(url_for('admin'))
-        else:
-            flash('Invalid password!', 'danger')
+        
+        # Check if logged in for other actions
+        if not session.get('admin_logged_in'):
+            flash('Please log in first!', 'danger')
+            return redirect(url_for('admin'))
+        
+        # Handle add/edit/delete actions
+        if action == 'add':
+            projects = load_projects()
+            new_project = {
+                'boma_id': request.form.get('boma_id', 'N/A'),
+                'name': request.form.get('name'),
+                'status': request.form.get('status'),
+                'units': int(request.form.get('units', 0)),
+                'image': request.form.get('image', ''),
+                'lat': float(request.form.get('lat', 0)),
+                'lon': float(request.form.get('lon', 0)),
+                'description': request.form.get('description', ''),
+                'unit_types': request.form.get('unit_types', ''),
+                'price_start': int(request.form.get('price_start', 0)) if request.form.get('price_start') else None
+            }
+            projects.append(new_project)
+            save_projects(projects)
+            flash('Project added successfully!', 'success')
+        
+        elif action == 'edit':
+            projects = load_projects()
+            project_id = int(request.form.get('project_id'))
+            projects[project_id].update({
+                'boma_id': request.form.get('boma_id', 'N/A'),
+                'name': request.form.get('name'),
+                'status': request.form.get('status'),
+                'units': int(request.form.get('units', 0)),
+                'image': request.form.get('image', ''),
+                'lat': float(request.form.get('lat', 0)),
+                'lon': float(request.form.get('lon', 0)),
+                'description': request.form.get('description', ''),
+                'unit_types': request.form.get('unit_types', ''),
+                'price_start': int(request.form.get('price_start', 0)) if request.form.get('price_start') else None
+            })
+            save_projects(projects)
+            flash('Project updated successfully!', 'success')
+        
+        elif action == 'delete':
+            projects = load_projects()
+            project_id = int(request.form.get('project_id'))
+            projects.pop(project_id)
+            save_projects(projects)
+            flash('Project deleted successfully!', 'success')
+        
+        elif action == 'logout':
+            session.pop('admin_logged_in', None)
+            flash('Logged out successfully!', 'info')
+        
+        return redirect(url_for('admin'))
     
     projects = load_projects()
-    return render_template('admin.html', projects=projects)
+    is_logged_in = session.get('admin_logged_in', False)
+    return render_template('admin.html', projects=projects, is_logged_in=is_logged_in)
 
 @app.route('/api/projects')
 def get_projects():
