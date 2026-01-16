@@ -8,6 +8,77 @@
     --danger-color: #dc3545;
 }
 
+/* Basemap Selector Styles */
+.basemap-selector {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    padding: 0;
+    overflow: hidden;
+}
+
+.basemap-selector-container {
+    position: relative;
+}
+
+.basemap-toggle {
+    border: none;
+    padding: 8px 12px;
+    font-weight: 500;
+    width: 100%;
+    text-align: left;
+    background: white;
+    transition: background-color 0.2s;
+}
+
+.basemap-toggle:hover {
+    background-color: #f8f9fa;
+}
+
+.basemap-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid #dee2e6;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.basemap-option {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    background: white;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.basemap-option:last-child {
+    border-bottom: none;
+}
+
+.basemap-option:hover {
+    background-color: #f8f9fa;
+}
+
+.basemap-option.active {
+    background-color: #0d6efd;
+    color: white;
+    font-weight: 600;
+}
+
+.basemap-option.active:hover {
+    background-color: #0b5ed7;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     min-height: 100vh;
