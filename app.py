@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request, redirect, url_for, flash, session
+from flask import Flask, render_template, jsonify, request, redirect, url_for, flash, session, Response
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_mail import Mail, Message
 from flask_wtf.csrf import CSRFProtect
@@ -56,16 +56,22 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 # CSRF Protection
 csrf = CSRFProtect(app)
 
-# File upload configuration
-UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
+# Image upload configuration (stored in database, not filesystem)
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB in bytes
 
-# Ensure upload directory exists
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
+
+# Image database connection string (separate from main database)
+IMAGE_DATABASE_URL = os.getenv('IMAGE_DATABASE_URL', 'postgresql+asyncpg://user_thirsty_chandrasekhar:NNFksljwaeuI1jKlOh1eroTIkzeSFaRX@34.32.192.66:5432/thirsty_chandrasekhar')
+
+# Convert asyncpg connection string format to psycopg2 format if needed
+if IMAGE_DATABASE_URL.startswith('postgresql+asyncpg://'):
+    IMAGE_DATABASE_URL = IMAGE_DATABASE_URL.replace('postgresql+asyncpg://', 'postgresql://', 1)
+
+if not IMAGE_DATABASE_URL:
+    logger.error('IMAGE_DATABASE_URL environment variable not set!')
+    raise ValueError('IMAGE_DATABASE_URL must be set for image storage')
 
 # Database connection string
 DATABASE_URL = os.getenv('DATABASE_URL')
@@ -141,6 +147,112 @@ def close_connection(exception):
     """Clean up database connection on request end"""
     if exception:
         logger.error(f'Request context error: {exception}')
+
+# Image database connection pool (separate from main database)
+_image_db_pool = None
+_image_db_pool_lock = threading.Lock()
+_image_db_initialized = False
+
+def init_image_db_pool():
+    """Initialize image database connection pool"""
+    global _image_db_pool
+    if not IMAGE_DATABASE_URL:
+        logger.error('IMAGE_DATABASE_URL not set')
+        return False
+    
+    try:
+        with _image_db_pool_lock:
+            _image_db_pool = psycopg2.pool.SimpleConnectionPool(1, 5, IMAGE_DATABASE_URL)
+        logger.info('Image database connection pool created successfully')
+        return True
+    except Exception as e:
+        logger.error(f'Error creating image database connection pool: {e}')
+        _image_db_pool = None
+        return False
+
+def get_image_db_connection():
+    """Get a connection from the image database pool"""
+    global _image_db_pool
+    if not IMAGE_DATABASE_URL:
+        raise ValueError('IMAGE_DATABASE_URL not configured')
+    
+    if _image_db_pool is None:
+        if not init_image_db_pool():
+            raise ValueError('Failed to initialize image database connection pool')
+    
+    if _image_db_pool:
+        try:
+            return _image_db_pool.getconn()
+        except Exception as e:
+            logger.error(f'Error getting image database connection: {e}')
+            raise
+    else:
+        raise ValueError('Image database connection pool failed')
+
+def return_image_db_connection(conn):
+    """Return a connection to the image database pool"""
+    global _image_db_pool
+    if _image_db_pool and conn:
+        try:
+            _image_db_pool.putconn(conn)
+        except Exception as e:
+            logger.error(f'Error returning image database connection: {e}')
+            try:
+                conn.close()
+            except:
+                pass
+    elif conn:
+        try:
+            conn.close()
+        except:
+            pass
+
+def init_image_db(force=False):
+    """Initialize image database table if it doesn't exist"""
+    global _image_db_initialized
+    if _image_db_initialized and not force:
+        return
+    
+    if not IMAGE_DATABASE_URL:
+        logger.error('IMAGE_DATABASE_URL not set, cannot initialize image database')
+        return
+    
+    conn = None
+    try:
+        conn = get_image_db_connection()
+        cur = conn.cursor()
+        
+        # Create images table
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS uploaded_images (
+                id SERIAL PRIMARY KEY,
+                filename VARCHAR(255) NOT NULL,
+                file_data BYTEA NOT NULL,
+                content_type VARCHAR(100) NOT NULL,
+                file_size INTEGER NOT NULL,
+                project_id INTEGER,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(filename)
+            )
+        ''')
+        
+        # Create index on filename for faster lookups
+        cur.execute('''
+            CREATE INDEX IF NOT EXISTS idx_uploaded_images_filename 
+            ON uploaded_images(filename)
+        ''')
+        
+        conn.commit()
+        cur.close()
+        _image_db_initialized = True
+        logger.info('Image database initialized successfully')
+    except Exception as e:
+        logger.error(f'Error initializing image database: {e}')
+        _image_db_initialized = False
+        raise
+    finally:
+        if conn:
+            return_image_db_connection(conn)
 
 # Initialize database tables
 _db_initialized = False
@@ -828,7 +940,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def handle_image_upload(file, project_id=None):
-    """Handle image file upload and return the URL path"""
+    """Handle image file upload and save to database, return the URL path"""
     if not file or file.filename == '':
         return None
     
@@ -836,7 +948,7 @@ def handle_image_upload(file, project_id=None):
     if not allowed_file(file.filename):
         raise ValueError('Invalid file type. Only image files (PNG, JPG, JPEG, GIF, WEBP) are allowed.')
     
-    # Check file size
+    # Read file data
     file.seek(0, os.SEEK_END)
     file_size = file.tell()
     file.seek(0)  # Reset file pointer
@@ -844,31 +956,76 @@ def handle_image_upload(file, project_id=None):
     if file_size > MAX_FILE_SIZE:
         raise ValueError(f'File size exceeds maximum allowed size of {MAX_FILE_SIZE // (1024*1024)}MB.')
     
-    # Generate unique filename
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    # Read file content
+    file_data = file.read()
+    file.seek(0)  # Reset for potential future use
+    
+    # Determine content type
     file_ext = file.filename.rsplit('.', 1)[1].lower()
+    content_type_map = {
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'png': 'image/png',
+        'gif': 'image/gif',
+        'webp': 'image/webp'
+    }
+    content_type = content_type_map.get(file_ext, 'image/jpeg')
+    
+    # Generate unique filename
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
     base_name = secure_filename(file.filename.rsplit('.', 1)[0])
+    if not base_name:
+        base_name = 'image'
+    
     if project_id:
         filename = f'project_{project_id}_{timestamp}_{base_name}.{file_ext}'
     else:
         filename = f'project_{timestamp}_{base_name}.{file_ext}'
     
-    # Ensure filename is unique
-    filepath = os.path.join(UPLOAD_FOLDER, filename)
-    counter = 1
-    while os.path.exists(filepath):
-        filename = f'project_{timestamp}_{base_name}_{counter}.{file_ext}'
-        filepath = os.path.join(UPLOAD_FOLDER, filename)
-        counter += 1
+    # Ensure database is initialized
+    init_image_db()
     
-    # Save file
+    # Save to database
+    conn = None
     try:
-        file.save(filepath)
-        # Return URL path (relative to static folder)
-        return url_for('static', filename=f'uploads/{filename}')
+        conn = get_image_db_connection()
+        cur = conn.cursor()
+        
+        # Check if filename already exists (shouldn't happen with timestamp, but be safe)
+        cur.execute('SELECT id FROM uploaded_images WHERE filename = %s', (filename,))
+        if cur.fetchone():
+            # Add random suffix if collision occurs
+            filename = f'project_{timestamp}_{secrets.token_hex(4)}_{base_name}.{file_ext}'
+        
+        # Insert image into database
+        cur.execute('''
+            INSERT INTO uploaded_images (filename, file_data, content_type, file_size, project_id)
+            VALUES (%s, %s, %s, %s, %s)
+            RETURNING id
+        ''', (filename, psycopg2.Binary(file_data), content_type, file_size, project_id))
+        
+        image_id = cur.fetchone()[0]
+        conn.commit()
+        cur.close()
+        
+        logger.info(f'Image saved to database: {filename} (id: {image_id}, size: {file_size} bytes)')
+        
+        # Return URL path that will serve the image from database
+        return url_for('serve_image', filename=filename)
+        
+    except psycopg2.Error as e:
+        logger.error(f'Database error saving image: {e}')
+        if conn:
+            conn.rollback()
+        raise ValueError(f'Error saving image to database: {str(e)}')
     except Exception as e:
         logger.error(f'Error saving uploaded file: {e}')
+        if conn:
+            conn.rollback()
         raise ValueError(f'Error saving file: {str(e)}')
+    finally:
+        if conn:
+            return_image_db_connection(conn)
 
 # Cache for projects data (in-memory cache) with thread safety
 _projects_cache = None
@@ -1693,6 +1850,54 @@ def get_projects():
         logger.error(f'Error in get_projects API: {e}')
         return jsonify({'error': 'Failed to load projects'}), 500
 
+@app.route('/uploads/<filename>')
+def serve_image(filename):
+    """Serve images from the image database"""
+    if not filename:
+        return 'Image not found', 404
+    
+    # Sanitize filename to prevent path traversal
+    filename = secure_filename(filename)
+    if not filename:
+        return 'Invalid filename', 400
+    
+    conn = None
+    try:
+        conn = get_image_db_connection()
+        cur = conn.cursor()
+        
+        # Retrieve image from database
+        cur.execute('''
+            SELECT file_data, content_type, file_size
+            FROM uploaded_images
+            WHERE filename = %s
+        ''', (filename,))
+        
+        result = cur.fetchone()
+        cur.close()
+        
+        if not result:
+            return 'Image not found', 404
+        
+        file_data, content_type, file_size = result
+        
+        # Return image with appropriate headers
+        return Response(
+            file_data,
+            mimetype=content_type,
+            headers={
+                'Content-Length': str(file_size),
+                'Cache-Control': 'public, max-age=31536000'  # Cache for 1 year
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f'Error serving image {filename}: {e}')
+        return 'Error serving image', 500
+    finally:
+        if conn:
+            return_image_db_connection(conn)
+
 @app.errorhandler(404)
 def not_found(error):
     logger.warning(f'404 error: {request.path}')
@@ -1756,6 +1961,17 @@ if __name__ == '__main__':
             logger.warning('Continuing in development mode without database')
     else:
         logger.warning('DATABASE_URL not set - database features will not be available')
+    
+    # Initialize image database connection pool and tables
+    try:
+        init_image_db_pool()
+        init_image_db()
+        logger.info('Image database initialized successfully')
+    except Exception as e:
+        logger.error(f'Failed to initialize image database: {e}')
+        if os.getenv('FLASK_ENV') == 'production':
+            raise
+        logger.warning('Continuing in development mode without image database')
     
     # Determine if debug mode should be enabled
     debug_mode = os.getenv('FLASK_ENV') != 'production'
