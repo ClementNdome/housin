@@ -2,16 +2,47 @@
 let map;
 let markers = [];
 let projects = [];
+let currentBasemap;
+let basemapLayers = {};
+
+// Define available basemaps
+const basemaps = {
+    'OpenStreetMap': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+    }),
+    'Satellite': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '© <a href="https://www.esri.com/">Esri</a>',
+        maxZoom: 19
+    }),
+    'Terrain': L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://opentopomap.org">OpenTopoMap</a> contributors',
+        maxZoom: 17
+    }),
+    'Dark': L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
+        maxZoom: 19
+    }),
+    'Light': L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
+        maxZoom: 19
+    }),
+    'Watercolor': L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.jpg', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, © <a href="https://stamen.com">Stamen Design</a>',
+        maxZoom: 18
+    })
+};
 
 $(document).ready(function() {
     // Initialize map centered on Kitui County
     map = L.map('map').setView([-1.374, 38.010], 10);
     
-    // Add OpenStreetMap tile layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19
-    }).addTo(map);
+    // Load saved basemap preference or use default
+    const savedBasemap = localStorage.getItem('selectedBasemap') || 'OpenStreetMap';
+    switchBasemap(savedBasemap);
+    
+    // Add basemap selector control
+    addBasemapSelector();
 
     // Fetch projects and add markers
     $.get('/api/projects', function(data) {
@@ -20,6 +51,125 @@ $(document).ready(function() {
         loadFavorites();
     });
 });
+
+function switchBasemap(basemapName) {
+    // Remove current basemap if it exists
+    if (currentBasemap) {
+        map.removeLayer(currentBasemap);
+    }
+    
+    // Add new basemap
+    if (basemaps[basemapName]) {
+        currentBasemap = basemaps[basemapName];
+        currentBasemap.addTo(map);
+        
+        // Save preference
+        localStorage.setItem('selectedBasemap', basemapName);
+        
+        // Update selector UI
+        updateBasemapSelector(basemapName);
+    }
+}
+
+function addBasemapSelector() {
+    // Create basemap selector control
+    const basemapControl = L.control({ position: 'topright' });
+    
+    basemapControl.onAdd = function(map) {
+        const div = L.DomUtil.create('div', 'basemap-selector');
+        const savedBasemap = localStorage.getItem('selectedBasemap') || 'OpenStreetMap';
+        
+        div.innerHTML = `
+            <div class="basemap-selector-container">
+                <button class="btn btn-sm btn-light basemap-toggle" type="button" title="Change Basemap">
+                    🗺️ Basemap
+                </button>
+                <div class="basemap-menu" style="display: none;">
+                    ${Object.keys(basemaps).map(name => `
+                        <button class="basemap-option ${name === savedBasemap ? 'active' : ''}" 
+                                data-basemap="${name}">
+                            ${name}
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        
+        // Prevent map click when clicking on control
+        L.DomEvent.disableClickPropagation(div);
+        L.DomEvent.disableScrollPropagation(div);
+        
+        // Toggle menu on button click
+        const toggleBtn = div.querySelector('.basemap-toggle');
+        const menu = div.querySelector('.basemap-menu');
+        
+        L.DomEvent.on(toggleBtn, 'click', function(e) {
+            L.DomEvent.stopPropagation(e);
+            const isVisible = menu.style.display !== 'none';
+            menu.style.display = isVisible ? 'none' : 'block';
+        });
+        
+        // Handle basemap option clicks
+        div.querySelectorAll('.basemap-option').forEach(option => {
+            L.DomEvent.on(option, 'click', function(e) {
+                L.DomEvent.stopPropagation(e);
+                const basemapName = option.dataset.basemap;
+                switchBasemap(basemapName);
+                menu.style.display = 'none';
+            });
+        });
+        
+        // Close menu when clicking outside (with slight delay to allow option click)
+        setTimeout(() => {
+            L.DomEvent.on(document, 'click', function() {
+                if (menu.style.display !== 'none') {
+                    menu.style.display = 'none';
+                }
+            });
+        }, 100);
+        
+        return div;
+    };
+    
+    basemapControl.addTo(map);
+    
+    // Also add to sidebar
+    addBasemapSelectorToSidebar();
+}
+
+function addBasemapSelectorToSidebar() {
+    const savedBasemap = localStorage.getItem('selectedBasemap') || 'OpenStreetMap';
+    const basemapHtml = `
+        <div class="mb-4">
+            <h5>🗺️ Basemap</h5>
+            <select class="form-select form-select-sm" id="sidebar-basemap-selector" onchange="switchBasemap(this.value)">
+                ${Object.keys(basemaps).map(name => `
+                    <option value="${name}" ${name === savedBasemap ? 'selected' : ''}>${name}</option>
+                `).join('')}
+            </select>
+        </div>
+    `;
+    
+    // Insert after search form
+    $('#search-form').after(basemapHtml);
+}
+
+function updateBasemapSelector(selectedBasemap) {
+    // Update active state in map control
+    document.querySelectorAll('.basemap-option').forEach(option => {
+        if (option.dataset.basemap === selectedBasemap) {
+            option.classList.add('active');
+        } else {
+            option.classList.remove('active');
+        }
+    });
+    
+    // Update sidebar selector
+    const sidebarSelector = document.getElementById('sidebar-basemap-selector');
+    if (sidebarSelector) {
+        sidebarSelector.value = selectedBasemap;
+    }
+}
 
 function addMarkersToMap(projectsData) {
     // Clear existing markers
@@ -156,3 +306,4 @@ function loadFavorites() {
 // Make functions available globally
 window.showProjectDetails = showProjectDetails;
 window.toggleFavorite = toggleFavorite;
+window.switchBasemap = switchBasemap;
