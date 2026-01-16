@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}About - Kitui Housing{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="display-4 mb-4">About Kitui Housing Dashboard</h1>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Our Mission</h2>
+                    <p class="card-text">
+                        The Kitui Housing Dashboard is a comprehensive web application designed to visualize and 
+                        provide information about affordable housing projects in Kitui County, Kenya. Our platform 
+                        makes it easy for residents, potential homebuyers, county officials, and developers to 
+                        explore housing opportunities across the county.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Kitui County Housing Context</h2>
+                    <p class="card-text">
+                        Kitui County has been actively participating in Kenya's Affordable Housing Program, 
+                        part of the Big 4 Agenda. The county government has partnered with various developers 
+                        to deliver affordable housing units to residents. Projects range from small-scale 
+                        developments to large estates with thousands of units.
+                    </p>
+                    <p class="card-text">
+                        Key initiatives include:
+                    </p>
+                    <ul>
+                        <li>Boma Yangu Kwa Ngendu Estate in Kitui Town</li>
+                        <li>Mwingi Kwa Ngendu Affordable Housing Project</li>
+                        <li>Manyenyoni Affordable Housing Project</li>
+                        <li>Civil Servants Housing Schemes</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Inspiration from Boma Yangu</h2>
+                    <p class="card-text">
+                        This dashboard is inspired by the <strong>Boma Yangu</strong> platform, which provides 
+                        a national view of affordable housing projects across Kenya. Our focus is specifically 
+                        on Kitui County, providing detailed, localized information that helps users make 
+                        informed decisions about housing in the region.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Features</h2>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">🗺️ <strong>Interactive Map:</strong> Explore projects on an interactive map powered by OpenStreetMap</li>
+                        <li class="mb-2">🔍 <strong>Smart Search:</strong> Find projects quickly with autocomplete search functionality</li>
+                        <li class="mb-2">📊 <strong>Statistics:</strong> View aggregated data and visualizations of housing projects</li>
+                        <li class="mb-2">📝 <strong>Detailed Information:</strong> Access comprehensive project details including status, units, pricing, and amenities</li>
+                        <li class="mb-2">⭐ <strong>Favorites:</strong> Save your preferred projects for quick access</li>
+                        <li class="mb-2">📱 <strong>Responsive Design:</strong> Access the dashboard on any device</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">Technology</h2>
+                    <p class="card-text">
+                        Built with modern web technologies:
+                    </p>
+                    <ul>
+                        <li><strong>Backend:</strong> Flask (Python)</li>
+                        <li><strong>Frontend:</strong> HTML5, CSS3, JavaScript</li>
+                        <li><strong>Maps:</strong> Leaflet.js with OpenStreetMap</li>
+                        <li><strong>UI Framework:</strong> Bootstrap 5</li>
+                        <li><strong>Data:</strong> JSON-based storage (easily migratable to database)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
