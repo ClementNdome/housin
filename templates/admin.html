@@ -5,14 +5,14 @@
 {% block extra_css %}
 <style>
     .admin-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1a4d47 0%, #2d6f65 100%);
         color: white;
         padding: 2rem;
         border-radius: 10px;
         margin-bottom: 2rem;
     }
     .stat-card {
-        border-left: 4px solid #667eea;
+        border-left: 4px solid #1a4d47;
         transition: transform 0.2s;
     }
     .stat-card:hover {
@@ -28,6 +28,9 @@
     .action-buttons .btn {
         margin-right: 0.25rem;
     }
+    .card-header {
+        background-color: #1a4d47 !important;
+    }
 </style>
 {% endblock %}
 
@@ -37,12 +40,12 @@
     <div class="admin-header">
         <div class="d-flex justify-content-between align-items-center">
             <div>
-                <h1 class="mb-1">🔐 Admin Panel</h1>
+                <h1 class="mb-1"><i class="fas fa-lock me-2"></i>Admin Panel</h1>
                 <p class="mb-0">Manage housing projects in Kitui County</p>
             </div>
             <div>
                 <a href="{{ url_for('logout') }}" class="btn btn-light">
-                    <i class="bi bi-box-arrow-right"></i> Logout
+                    <i class="fas fa-sign-out-alt me-2"></i>Logout
                 </a>
             </div>
         </div>
@@ -88,11 +91,12 @@
         <!-- Add Project Form -->
         <div class="col-lg-4 mb-4">
             <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">➕ Add New Project</h5>
+                <div class="card-header text-white">
+                    <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Add New Project</h5>
                 </div>
                 <div class="card-body">
                     <form method="POST" action="{{ url_for('admin') }}" id="add-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <input type="hidden" name="action" value="add">
                         
                         <div class="mb-3">
@@ -217,14 +221,15 @@
                                         {% endif %}
                                     </td>
                                     <td class="action-buttons">
-                                        <button class="btn btn-sm btn-primary" onclick="editProject({{ loop.index0 }})" title="Edit">
-                                            ✏️ Edit
+                                        <button class="btn btn-sm btn-primary" onclick="editProject({{ project.id }})" title="Edit">
+                                            <i class="fas fa-edit me-1"></i>Edit
                                         </button>
                                         <form method="POST" action="{{ url_for('admin') }}" style="display: inline;" onsubmit="return confirmDelete('{{ project.name }}')">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                             <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="project_id" value="{{ loop.index0 }}">
+                                            <input type="hidden" name="project_id" value="{{ project.id }}">
                                             <button type="submit" class="btn btn-sm btn-danger" title="Delete">
-                                                🗑️ Delete
+                                                <i class="fas fa-trash me-1"></i>Delete
                                             </button>
                                         </form>
                                     </td>
@@ -248,12 +253,13 @@
 <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="editModalLabel">✏️ Edit Project</h5>
+            <div class="modal-header text-white" style="background-color: #1a4d47;">
+                <h5 class="modal-title" id="editModalLabel"><i class="fas fa-edit me-2"></i>Edit Project</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form method="POST" action="{{ url_for('admin') }}" id="edit-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <input type="hidden" name="action" value="edit">
                     <input type="hidden" name="project_id" id="edit-project_id">
                     
@@ -347,14 +353,14 @@ const projects = {{ projects | tojson }};
     });
 })();
 
-function editProject(index) {
-    const project = projects[index];
+function editProject(projectId) {
+    const project = projects.find(p => p.id === projectId);
     if (!project) {
         alert('Project not found!');
         return;
     }
     
-    document.getElementById('edit-project_id').value = index;
+    document.getElementById('edit-project_id').value = project.id;
     document.getElementById('edit-boma_id').value = project.boma_id || '';
     document.getElementById('edit-name').value = project.name || '';
     document.getElementById('edit-status').value = project.status || 'planned';

@@ -1,7 +1,15 @@
 /* Custom styles for Kitui Housing Dashboard */
 
 :root {
-    --primary-color: #0d6efd;
+    --primary-color: #1a4d47;
+    --primary-light: #2d6f65;
+    --primary-dark: #0f3330;
+    --accent-blue: #2b5f8e;
+    --accent-blue-light: #4a8fc7;
+    --neutral-white: #f8fafb;
+    --neutral-light: #e8eff0;
+    --text-dark: #1a3a38;
+    --text-muted: #5a7572;
     --secondary-color: #6c757d;
     --success-color: #198754;
     --warning-color: #ffc107;
@@ -80,13 +88,13 @@ img {
 }
 
 .basemap-option.active {
-    background-color: #0d6efd;
+    background-color: var(--primary-color);
     color: white;
     font-weight: 600;
 }
 
 .basemap-option.active:hover {
-    background-color: #0b5ed7;
+    background-color: var(--primary-light);
 }
 
 body {
@@ -158,7 +166,7 @@ main {
 
 #search-input:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(26, 77, 71, 0.25);
 }
 
 /* Favorites list */

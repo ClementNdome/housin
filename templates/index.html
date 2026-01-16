@@ -5,28 +5,71 @@
 {% block extra_css %}
 <style>
     .hero-section {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1a4d47 0%, #2d6f65 100%);
         color: white;
-        padding: 80px 0;
+        padding: 100px 0;
         margin-bottom: 60px;
+    }
+    .hero-section h1 {
+        font-weight: 700;
+        margin-bottom: 20px;
+        letter-spacing: -0.5px;
+    }
+    .hero-section .lead {
+        font-size: 1.25rem;
+        line-height: 1.8;
+        opacity: 0.95;
     }
     .feature-card {
         transition: transform 0.3s, box-shadow 0.3s;
         height: 100%;
+        border: none;
+        background: white;
     }
     .feature-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        transform: translateY(-8px);
+        box-shadow: 0 12px 30px rgba(26, 77, 71, 0.15);
+    }
+    .feature-card .card-body {
+        padding: 2rem;
+    }
+    .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: #1a4d47;
     }
     .cta-button {
-        padding: 15px 40px;
-        font-size: 1.2rem;
-        border-radius: 50px;
+        padding: 12px 35px;
+        font-size: 1rem;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: all 0.3s;
     }
-    .stats-banner {
-        background: #f8f9fa;
-        padding: 40px 0;
-        border-radius: 10px;
+    .cta-button:hover {
+        transform: translateY(-2px);
+    }
+    .btn-primary-custom {
+        background-color: white;
+        color: #1a4d47;
+        border: none;
+    }
+    .btn-primary-custom:hover {
+        background-color: #f8fafb;
+        color: #1a4d47;
+    }
+    .stats-box {
+        text-align: center;
+        padding: 1.5rem;
+    }
+    .stats-box h3 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #1a4d47;
+        margin: 0;
+    }
+    .stats-box p {
+        color: #5a7572;
+        margin-top: 0.5rem;
     }
 </style>
 {% endblock %}
@@ -37,36 +80,45 @@
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-6">
-                <h1 class="display-3 fw-bold mb-4">🏠 Kitui Housing Dashboard</h1>
+                <h1 class="display-4">Explore Housing Projects</h1>
                 <p class="lead mb-4">
-                    Explore affordable housing projects across Kitui County, Kenya. 
-                    Discover locations, view project details, and access comprehensive 
-                    information about housing developments in the region.
+                    Discover affordable housing developments across Kitui County. 
+                    Interactive maps, detailed project information, and comprehensive 
+                    statistics all in one place.
                 </p>
                 <div class="d-flex gap-3 flex-wrap">
-                    <a href="{{ url_for('dashboard') }}" class="btn btn-light btn-lg cta-button">
-                        🗺️ View Dashboard
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary-custom btn-lg cta-button">
+                        <i class="fas fa-map me-2"></i>View Dashboard
                     </a>
                     <a href="{{ url_for('about') }}" class="btn btn-outline-light btn-lg cta-button">
-                        📖 Learn More
+                        <i class="fas fa-arrow-right me-2"></i>Learn More
                     </a>
                 </div>
             </div>
-            <div class="col-lg-6 text-center mt-4 mt-lg-0">
-                <div class="bg-white bg-opacity-10 p-5 rounded-4">
-                    <h3 class="mb-3">Quick Stats</h3>
-                    <div class="row text-center">
-                        <div class="col-4">
-                            <h2 class="fw-bold" id="total-projects">-</h2>
-                            <small>Projects</small>
+            <div class="col-lg-6 mt-4 mt-lg-0">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="stats-box bg-white bg-opacity-15 rounded p-3">
+                            <h3 id="total-projects">-</h3>
+                            <p class="mb-0">Projects</p>
                         </div>
-                        <div class="col-4">
-                            <h2 class="fw-bold" id="total-units">-</h2>
-                            <small>Total Units</small>
+                    </div>
+                    <div class="col-6">
+                        <div class="stats-box bg-white bg-opacity-15 rounded p-3">
+                            <h3 id="total-units">-</h3>
+                            <p class="mb-0">Total Units</p>
                         </div>
-                        <div class="col-4">
-                            <h2 class="fw-bold" id="ongoing-projects">-</h2>
-                            <small>Ongoing</small>
+                    </div>
+                    <div class="col-6">
+                        <div class="stats-box bg-white bg-opacity-15 rounded p-3">
+                            <h3 id="ongoing-projects">-</h3>
+                            <p class="mb-0">Ongoing</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stats-box bg-white bg-opacity-15 rounded p-3">
+                            <h3>3+</h3>
+                            <p class="mb-0">Counties</p>
                         </div>
                     </div>
                 </div>
@@ -78,155 +130,63 @@
 <!-- Features Section -->
 <div class="container mb-5">
     <div class="text-center mb-5">
-        <h2 class="display-5 mb-3">Key Features</h2>
-        <p class="lead text-muted">Everything you need to explore housing projects in Kitui County</p>
+        <h2 class="display-5 fw-bold mb-3" style="color: #1a4d47;">Core Features</h2>
+        <p class="lead text-muted">Everything you need to explore Kitui County's housing projects</p>
     </div>
     
     <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card feature-card h-100 border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="text-primary mb-3" style="font-size: 3rem;">🗺️</div>
-                    <h4 class="card-title">Interactive Map</h4>
-                    <p class="card-text text-muted">
-                        Explore housing projects on an interactive map with multiple basemap options. 
-                        Click on markers to view detailed project information.
-                    </p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-4">
-            <div class="card feature-card h-100 border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="text-success mb-3" style="font-size: 3rem;">🔍</div>
-                    <h4 class="card-title">Smart Search</h4>
-                    <p class="card-text text-muted">
-                        Find projects quickly with autocomplete search. Search by project name 
-                        or location and get instant results.
-                    </p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-4">
-            <div class="card feature-card h-100 border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="text-info mb-3" style="font-size: 3rem;">📊</div>
-                    <h4 class="card-title">Statistics & Analytics</h4>
-                    <p class="card-text text-muted">
-                        View comprehensive statistics, charts, and visualizations of housing 
-                        projects across Kitui County.
-                    </p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-4">
-            <div class="card feature-card h-100 border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="text-warning mb-3" style="font-size: 3rem;">⭐</div>
-                    <h4 class="card-title">Favorites</h4>
-                    <p class="card-text text-muted">
-                        Save your favorite projects for quick access. Your favorites are stored 
-                        locally in your browser.
-                    </p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-4">
-            <div class="card feature-card h-100 border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="text-danger mb-3" style="font-size: 3rem;">📱</div>
-                    <h4 class="card-title">Mobile Friendly</h4>
-                    <p class="card-text text-muted">
-                        Fully responsive design that works seamlessly on desktop, tablet, 
-                        and mobile devices.
-                    </p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-4">
-            <div class="card feature-card h-100 border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="text-secondary mb-3" style="font-size: 3rem;">🔐</div>
-                    <h4 class="card-title">Admin Access</h4>
-                    <p class="card-text text-muted">
-                        Registered users can access the admin panel to manage projects, 
-                        add new developments, and update information.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- How to Access Section -->
-<div class="container mb-5">
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-5">
-            <h2 class="text-center mb-4">How to Get Started</h2>
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <div class="d-flex">
-                        <div class="flex-shrink-0">
-                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem; font-weight: bold;">1</div>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h5>Explore the Dashboard</h5>
-                            <p class="text-muted">
-                                Click the "View Dashboard" button above or navigate to the Dashboard 
-                                from the menu to see all housing projects on an interactive map.
-                            </p>
-                        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card feature-card">
+                <div class="card-body">
+                    <div class="feature-icon">
+                        <i class="fas fa-map"></i>
                     </div>
+                    <h5 class="card-title">Interactive Map</h5>
+                    <p class="card-text text-muted">
+                        Explore projects on an interactive map with detailed location markers.
+                    </p>
                 </div>
-                
-                <div class="col-md-6 mb-4">
-                    <div class="d-flex">
-                        <div class="flex-shrink-0">
-                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem; font-weight: bold;">2</div>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h5>Search & Explore</h5>
-                            <p class="text-muted">
-                                Use the search bar to find specific projects, click on map markers 
-                                to view details, and save your favorites for quick access.
-                            </p>
-                        </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3">
+            <div class="card feature-card">
+                <div class="card-body">
+                    <div class="feature-icon">
+                        <i class="fas fa-search"></i>
                     </div>
+                    <h5 class="card-title">Smart Search</h5>
+                    <p class="card-text text-muted">
+                        Find projects quickly with autocomplete search functionality.
+                    </p>
                 </div>
-                
-                <div class="col-md-6 mb-4">
-                    <div class="d-flex">
-                        <div class="flex-shrink-0">
-                            <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem; font-weight: bold;">3</div>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h5>View Statistics</h5>
-                            <p class="text-muted">
-                                Visit the Statistics page to see aggregated data, charts, and 
-                                visualizations of all housing projects.
-                            </p>
-                        </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3">
+            <div class="card feature-card">
+                <div class="card-body">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-pie"></i>
                     </div>
+                    <h5 class="card-title">Analytics</h5>
+                    <p class="card-text text-muted">
+                        View comprehensive statistics and visualizations of all projects.
+                    </p>
                 </div>
-                
-                <div class="col-md-6 mb-4">
-                    <div class="d-flex">
-                        <div class="flex-shrink-0">
-                            <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem; font-weight: bold;">4</div>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h5>Create Account (Optional)</h5>
-                            <p class="text-muted">
-                                Sign up for an account to access the admin panel and manage 
-                                projects. Registration is quick and free.
-                            </p>
-                        </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3">
+            <div class="card feature-card">
+                <div class="card-body">
+                    <div class="feature-icon">
+                        <i class="fas fa-heart"></i>
                     </div>
+                    <h5 class="card-title">Favorites</h5>
+                    <p class="card-text text-muted">
+                        Save your preferred projects for quick access anytime.
+                    </p>
                 </div>
             </div>
         </div>
@@ -235,12 +195,12 @@
 
 <!-- Call to Action -->
 <div class="container mb-5">
-    <div class="card bg-primary text-white border-0">
-        <div class="card-body p-5 text-center">
-            <h2 class="mb-3">Ready to Explore?</h2>
-            <p class="lead mb-4">Start exploring affordable housing projects in Kitui County today!</p>
+    <div class="card border-0" style="background: linear-gradient(135deg, #1a4d47 0%, #2d6f65 100%);">
+        <div class="card-body p-5 text-center text-white">
+            <h2 class="mb-3 fw-bold">Ready to Explore?</h2>
+            <p class="lead mb-4">Start discovering affordable housing projects in Kitui County today</p>
             <a href="{{ url_for('dashboard') }}" class="btn btn-light btn-lg cta-button">
-                🚀 Go to Dashboard
+                <i class="fas fa-arrow-right me-2"></i>Go to Dashboard
             </a>
         </div>
     </div>
@@ -260,7 +220,6 @@ $(document).ready(function() {
         $('#total-units').text(totalUnits.toLocaleString());
         $('#ongoing-projects').text(ongoingProjects);
     }).fail(function() {
-        // If API fails, show placeholders
         $('#total-projects').text('5+');
         $('#total-units').text('3,000+');
         $('#ongoing-projects').text('3+');

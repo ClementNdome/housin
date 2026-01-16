@@ -2,60 +2,165 @@
 
 {% block title %}Contact - Kitui Housing{% endblock %}
 
+{% block extra_css %}
+<style>
+    .contact-hero {
+        background: linear-gradient(135deg, #1a4d47 0%, #2d6f65 100%);
+        color: white;
+        padding: 60px 0;
+        margin-bottom: 40px;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #1a4d47;
+        margin-bottom: 8px;
+    }
+    .form-control {
+        border: 2px solid #e8eff0;
+        padding: 10px 15px;
+        transition: border-color 0.3s;
+    }
+    .form-control:focus {
+        border-color: #1a4d47;
+        box-shadow: 0 0 0 0.2rem rgba(26, 77, 71, 0.15);
+    }
+    .btn-submit {
+        background-color: #1a4d47;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    .btn-submit:hover {
+        background-color: #0f3330;
+        color: white;
+        transform: translateY(-2px);
+    }
+    .contact-info-card {
+        background: #f8fafb;
+        padding: 25px;
+        border-radius: 8px;
+        border-left: 4px solid #1a4d47;
+        margin-bottom: 20px;
+    }
+    .contact-info-icon {
+        font-size: 1.5rem;
+        color: #1a4d47;
+        margin-bottom: 10px;
+    }
+    .contact-info-title {
+        font-weight: 600;
+        color: #1a4d47;
+        margin-bottom: 5px;
+    }
+    .btn-back {
+        background-color: transparent;
+        color: #1a4d47;
+        border: 2px solid #1a4d47;
+        padding: 10px 25px;
+        font-weight: 500;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn-back:hover {
+        background-color: #1a4d47;
+        color: white;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container my-5">
+<!-- Hero Section -->
+<div class="contact-hero">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3">Get in Touch</h1>
+        <p class="lead mb-0">Have questions or feedback? We'd love to hear from you. Reach out to us through any of these channels.</p>
+    </div>
+</div>
+
+<div class="container">
     <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <h1 class="display-4 mb-4">Contact Us</h1>
+        <div class="col-lg-6 mb-5">
+            <h2 style="color: #1a4d47;" class="mb-4"><i class="fas fa-envelope me-2"></i>Send us a Message</h2>
             
-            <div class="card mb-4">
-                <div class="card-body">
-                    <p class="lead">
-                        Have questions, suggestions, or feedback about the Kitui Housing Dashboard? 
-                        We'd love to hear from you!
-                    </p>
+            <form method="POST" action="{{ url_for('contact') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div class="mb-3">
+                    <label for="name" class="form-label"><i class="fas fa-user me-2"></i>Full Name *</label>
+                    <input type="text" class="form-control" id="name" name="name" required placeholder="Your name">
                 </div>
+                
+                <div class="mb-3">
+                    <label for="email" class="form-label"><i class="fas fa-at me-2"></i>Email Address *</label>
+                    <input type="email" class="form-control" id="email" name="email" required placeholder="your@email.com">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="subject" class="form-label"><i class="fas fa-heading me-2"></i>Subject</label>
+                    <input type="text" class="form-control" id="subject" name="subject" placeholder="What is this about?">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="message" class="form-label"><i class="fas fa-comment me-2"></i>Message *</label>
+                    <textarea class="form-control" id="message" name="message" rows="5" required placeholder="Please share your message or feedback..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-submit btn-lg">
+                    <i class="fas fa-paper-plane me-2"></i>Send Message
+                </button>
+            </form>
+        </div>
+
+        <div class="col-lg-6">
+            <h2 style="color: #1a4d47;" class="mb-4"><i class="fas fa-info-circle me-2"></i>Contact Information</h2>
+            
+            <div class="contact-info-card">
+                <div class="contact-info-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="contact-info-title">Email Support</div>
+                <p class="text-muted mb-0">
+                    For inquiries and support, please reach out to us at:<br>
+                    <strong><a href="mailto:info@spationex.com" style="color: #1a4d47;">info@spationex.com</a></strong>
+                </p>
             </div>
 
-            <div class="card">
-                <div class="card-body">
-                    <form method="POST" action="{{ url_for('contact') }}">
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Name *</label>
-                            <input type="text" class="form-control" id="name" name="name" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email *</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="subject" class="form-label">Subject</label>
-                            <input type="text" class="form-control" id="subject" name="subject">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="message" class="form-label">Message *</label>
-                            <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary">Send Message</button>
-                    </form>
+            <div class="contact-info-card">
+                <div class="contact-info-icon">
+                    <i class="fas fa-question-circle"></i>
                 </div>
+                <div class="contact-info-title">General Support</div>
+                <p class="text-muted mb-0">
+                    Have questions about the dashboard or housing projects? Our support team is here to help you explore housing opportunities in Kitui County.
+                </p>
             </div>
 
-            <div class="card mt-4">
-                <div class="card-body">
-                    <h5 class="card-title">Additional Information</h5>
-                    <p class="card-text">
-                        <strong>Note:</strong> This is a prototype application. In a production environment, 
-                        messages would be sent via email using Flask-Mail or a similar service. For now, 
-                        your feedback is logged and will be reviewed.
-                    </p>
+            <div class="contact-info-card">
+                <div class="contact-info-icon">
+                    <i class="fas fa-lightbulb"></i>
                 </div>
+                <div class="contact-info-title">Feedback & Suggestions</div>
+                <p class="text-muted mb-0">
+                    We're always looking to improve. If you have suggestions or feedback about the dashboard, please let us know. Your input helps us serve you better.
+                </p>
+            </div>
+
+            <div class="alert alert-light border" style="border-color: #2d6f65 !important; margin-top: 20px;">
+                <i class="fas fa-clock" style="color: #1a4d47;"></i>
+                <small class="ms-2" style="color: #5a7572;">
+                    <strong>Response Time:</strong> We aim to respond to all inquiries within 24-48 hours. Thank you for reaching out to us!
+                </small>
             </div>
         </div>
+    </div>
+
+    <!-- Back Navigation -->
+    <div class="text-center my-5">
+        <a href="{{ url_for('index') }}" class="btn-back">
+            <i class="fas fa-arrow-left me-2"></i>Back to Home
+        </a>
     </div>
 </div>
 {% endblock %}

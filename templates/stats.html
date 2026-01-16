@@ -2,42 +2,60 @@
 
 {% block title %}Statistics - Kitui Housing{% endblock %}
 
-{% block extra_css %}{% endblock %}
+{% block extra_css %}
+<style>
+    .stat-card {
+        border-top: 4px solid #1a4d47;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(26, 77, 71, 0.1);
+    }
+    .stat-number {
+        color: #1a4d47;
+    }
+    .stat-label {
+        color: #5a7572;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="container my-5">
-    <h1 class="display-4 mb-5">Housing Statistics</h1>
+    <h1 class="display-4 mb-5" style="color: #1a4d47;"><i class="fas fa-chart-pie me-3"></i>Housing Statistics</h1>
     
     <div class="row mb-4">
         <div class="col-md-3">
-            <div class="card text-center">
+            <div class="card stat-card text-center border-0 shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title">Total Projects</h5>
-                    <h2 class="text-primary" id="total-projects">-</h2>
+                    <h5 class="stat-label">Total Projects</h5>
+                    <h2 class="stat-number" id="total-projects">-</h2>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card text-center">
+            <div class="card stat-card text-center border-0 shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title">Total Units</h5>
-                    <h2 class="text-success" id="total-units">-</h2>
+                    <h5 class="stat-label">Total Units</h5>
+                    <h2 class="stat-number" id="total-units">-</h2>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card text-center">
+            <div class="card stat-card text-center border-0 shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title">Ongoing Projects</h5>
-                    <h2 class="text-warning" id="ongoing-count">-</h2>
+                    <h5 class="stat-label">Ongoing Projects</h5>
+                    <h2 class="stat-number" id="ongoing-count">-</h2>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card text-center">
+            <div class="card stat-card text-center border-0 shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title">Completed Projects</h5>
-                    <h2 class="text-info" id="completed-count">-</h2>
+                    <h5 class="stat-label">Completed Projects</h5>
+                    <h2 class="stat-number" id="completed-count">-</h2>
                 </div>
             </div>
         </div>

@@ -2,87 +2,224 @@
 
 {% block title %}About - Kitui Housing{% endblock %}
 
+{% block extra_css %}
+<style>
+    .about-hero {
+        background: linear-gradient(135deg, #1a4d47 0%, #2d6f65 100%);
+        color: white;
+        padding: 60px 0;
+        margin-bottom: 40px;
+    }
+    .about-section {
+        margin-bottom: 40px;
+    }
+    .section-heading {
+        color: #1a4d47;
+        font-weight: 700;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 3px solid #2d6f65;
+        display: inline-block;
+    }
+    .feature-list li {
+        margin-bottom: 12px;
+        line-height: 1.8;
+    }
+    .feature-list i {
+        color: #1a4d47;
+        margin-right: 12px;
+        width: 20px;
+    }
+    .cta-section {
+        background-color: #f8fafb;
+        padding: 40px;
+        border-radius: 8px;
+        margin: 40px 0;
+        border-left: 4px solid #1a4d47;
+    }
+    .btn-group-cta {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    .btn-custom-primary {
+        background-color: #1a4d47;
+        color: white;
+        border: none;
+        padding: 10px 25px;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+    .btn-custom-primary:hover {
+        background-color: #0f3330;
+        color: white;
+        transform: translateY(-2px);
+    }
+    .btn-custom-secondary {
+        background-color: transparent;
+        color: #1a4d47;
+        border: 2px solid #1a4d47;
+        padding: 10px 25px;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+    .btn-custom-secondary:hover {
+        background-color: #1a4d47;
+        color: white;
+        transform: translateY(-2px);
+    }
+    .tech-stack {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+    .tech-badge {
+        background: white;
+        border: 2px solid #e8eff0;
+        padding: 15px;
+        text-align: center;
+        border-radius: 6px;
+        transition: all 0.3s;
+    }
+    .tech-badge:hover {
+        border-color: #1a4d47;
+        box-shadow: 0 4px 12px rgba(26, 77, 71, 0.1);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container my-5">
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <h1 class="display-4 mb-4">About Kitui Housing Dashboard</h1>
-            
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h2 class="card-title">Our Mission</h2>
-                    <p class="card-text">
-                        The Kitui Housing Dashboard is a comprehensive web application designed to visualize and 
-                        provide information about affordable housing projects in Kitui County, Kenya. Our platform 
-                        makes it easy for residents, potential homebuyers, county officials, and developers to 
-                        explore housing opportunities across the county.
-                    </p>
-                </div>
-            </div>
+<!-- Hero Section -->
+<div class="about-hero">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3">About Kitui Housing Dashboard</h1>
+        <p class="lead mb-0">Empowering residents and stakeholders with accessible information about affordable housing in Kitui County</p>
+    </div>
+</div>
 
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h2 class="card-title">Kitui County Housing Context</h2>
-                    <p class="card-text">
-                        Kitui County has been actively participating in Kenya's Affordable Housing Program, 
-                        part of the Big 4 Agenda. The county government has partnered with various developers 
-                        to deliver affordable housing units to residents. Projects range from small-scale 
-                        developments to large estates with thousands of units.
-                    </p>
-                    <p class="card-text">
-                        Key initiatives include:
-                    </p>
-                    <ul>
-                        <li>Boma Yangu Kwa Ngendu Estate in Kitui Town</li>
-                        <li>Mwingi Kwa Ngendu Affordable Housing Project</li>
-                        <li>Manyenyoni Affordable Housing Project</li>
-                        <li>Civil Servants Housing Schemes</li>
-                    </ul>
-                </div>
-            </div>
+<div class="container">
+    <!-- Mission Section -->
+    <div class="about-section">
+        <h2 class="section-heading"><i class="fas fa-bullseye me-2"></i>Our Mission</h2>
+        <p class="lead text-muted mb-3">
+            The Kitui Housing Dashboard is a comprehensive web application designed to visualize and provide information about affordable housing projects in Kitui County, Kenya. Our platform makes it easy for residents, potential homebuyers, county officials, and developers to explore housing opportunities across the county.
+        </p>
+        <p>
+            We believe that access to clear, accurate information about housing developments is essential for informed decision-making. Whether you're exploring your first home, investigating investment opportunities, or staying updated on county initiatives, we're here to make that process seamless.
+        </p>
+    </div>
 
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h2 class="card-title">Inspiration from Boma Yangu</h2>
-                    <p class="card-text">
-                        This dashboard is inspired by the <strong>Boma Yangu</strong> platform, which provides 
-                        a national view of affordable housing projects across Kenya. Our focus is specifically 
-                        on Kitui County, providing detailed, localized information that helps users make 
-                        informed decisions about housing in the region.
-                    </p>
-                </div>
-            </div>
+    <!-- Context Section -->
+    <div class="about-section">
+        <h2 class="section-heading"><i class="fas fa-map-marker-alt me-2"></i>Kitui County Context</h2>
+        <p class="text-muted mb-3">
+            Kitui County has been actively participating in Kenya's Affordable Housing Program, part of the Big 4 Agenda. The county government has partnered with various developers to deliver affordable housing units to residents. Projects range from small-scale developments to large estates with thousands of units.
+        </p>
+        <h5 class="mt-4 mb-3" style="color: #1a4d47;">Key Housing Initiatives:</h5>
+        <ul class="feature-list list-unstyled">
+            <li><i class="fas fa-check-circle"></i><strong>Boma Yangu Kwa Ngendu Estate</strong> - Located in Kitui Town with 166 modern housing units</li>
+            <li><i class="fas fa-check-circle"></i><strong>Mwingi Affordable Housing Project</strong> - Large-scale development targeting 2,000 housing units</li>
+            <li><i class="fas fa-check-circle"></i><strong>Manyenyoni Project</strong> - Four-storey residential blocks with 205 units in Kitui Town</li>
+            <li><i class="fas fa-check-circle"></i><strong>Civil Servants Housing Schemes</strong> - Dedicated housing programs for government employees</li>
+        </ul>
+    </div>
 
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h2 class="card-title">Features</h2>
-                    <ul class="list-unstyled">
-                        <li class="mb-2">🗺️ <strong>Interactive Map:</strong> Explore projects on an interactive map powered by OpenStreetMap</li>
-                        <li class="mb-2">🔍 <strong>Smart Search:</strong> Find projects quickly with autocomplete search functionality</li>
-                        <li class="mb-2">📊 <strong>Statistics:</strong> View aggregated data and visualizations of housing projects</li>
-                        <li class="mb-2">📝 <strong>Detailed Information:</strong> Access comprehensive project details including status, units, pricing, and amenities</li>
-                        <li class="mb-2">⭐ <strong>Favorites:</strong> Save your preferred projects for quick access</li>
-                        <li class="mb-2">📱 <strong>Responsive Design:</strong> Access the dashboard on any device</li>
-                    </ul>
-                </div>
-            </div>
+    <!-- Inspiration Section -->
+    <div class="about-section">
+        <h2 class="section-heading"><i class="fas fa-lightbulb me-2"></i>Inspiration & Vision</h2>
+        <p class="text-muted mb-3">
+            This dashboard is inspired by the <strong>Boma Yangu</strong> platform, which provides a national view of affordable housing projects across Kenya. Our focus is specifically on Kitui County, providing detailed, localized information that helps users make informed decisions about housing in the region.
+        </p>
+        <p>
+            We vision a future where every resident of Kitui County has easy access to information about housing opportunities, enabling them to make better choices for themselves and their families.
+        </p>
+    </div>
 
-            <div class="card">
-                <div class="card-body">
-                    <h2 class="card-title">Technology</h2>
-                    <p class="card-text">
-                        Built with modern web technologies:
-                    </p>
-                    <ul>
-                        <li><strong>Backend:</strong> Flask (Python)</li>
-                        <li><strong>Frontend:</strong> HTML5, CSS3, JavaScript</li>
-                        <li><strong>Maps:</strong> Leaflet.js with OpenStreetMap</li>
-                        <li><strong>UI Framework:</strong> Bootstrap 5</li>
-                        <li><strong>Data:</strong> JSON-based storage (easily migratable to database)</li>
-                    </ul>
-                </div>
+    <!-- Features Section -->
+    <div class="about-section">
+        <h2 class="section-heading"><i class="fas fa-star me-2"></i>Key Features</h2>
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <ul class="feature-list list-unstyled">
+                    <li><i class="fas fa-map"></i><strong>Interactive Map</strong> - Explore projects on an interactive map powered by OpenStreetMap</li>
+                    <li><i class="fas fa-search"></i><strong>Smart Search</strong> - Find projects quickly with autocomplete search functionality</li>
+                    <li><i class="fas fa-chart-pie"></i><strong>Statistics</strong> - View aggregated data and visualizations of housing projects</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <ul class="feature-list list-unstyled">
+                    <li><i class="fas fa-file-alt"></i><strong>Detailed Information</strong> - Access comprehensive project details including status, units, and pricing</li>
+                    <li><i class="fas fa-heart"></i><strong>Favorites</strong> - Save your preferred projects for quick access</li>
+                    <li><i class="fas fa-mobile-alt"></i><strong>Responsive Design</strong> - Access the dashboard on any device</li>
+                </ul>
             </div>
         </div>
+    </div>
+
+    <!-- Technology Section -->
+    <div class="about-section">
+        <h2 class="section-heading"><i class="fas fa-code me-2"></i>Technology Stack</h2>
+        <p class="text-muted mb-4">
+            Built with modern, reliable web technologies that ensure performance, scalability, and maintainability:
+        </p>
+        <div class="tech-stack">
+            <div class="tech-badge">
+                <i class="fas fa-server" style="font-size: 2rem; color: #1a4d47; margin-bottom: 10px;"></i>
+                <h6>Backend</h6>
+                <small>Flask (Python)</small>
+            </div>
+            <div class="tech-badge">
+                <i class="fas fa-code" style="font-size: 2rem; color: #1a4d47; margin-bottom: 10px;"></i>
+                <h6>Frontend</h6>
+                <small>HTML5, CSS3, JavaScript</small>
+            </div>
+            <div class="tech-badge">
+                <i class="fas fa-map" style="font-size: 2rem; color: #1a4d47; margin-bottom: 10px;"></i>
+                <h6>Maps</h6>
+                <small>Leaflet.js, OpenStreetMap</small>
+            </div>
+            <div class="tech-badge">
+                <i class="fas fa-database" style="font-size: 2rem; color: #1a4d47; margin-bottom: 10px;"></i>
+                <h6>Database</h6>
+                <small>PostgreSQL</small>
+            </div>
+            <div class="tech-badge">
+                <i class="fas fa-square" style="font-size: 2rem; color: #1a4d47; margin-bottom: 10px;"></i>
+                <h6>Framework</h6>
+                <small>Bootstrap 5</small>
+            </div>
+            <div class="tech-badge">
+                <i class="fas fa-chart-bar" style="font-size: 2rem; color: #1a4d47; margin-bottom: 10px;"></i>
+                <h6>Charts</h6>
+                <small>Chart.js</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action Section -->
+    <div class="cta-section">
+        <h3 style="color: #1a4d47;" class="mb-3"><i class="fas fa-arrow-right me-2"></i>Ready to Explore?</h3>
+        <p class="mb-4">Discover affordable housing opportunities in Kitui County. Start exploring now or contact us for more information.</p>
+        <div class="btn-group-cta">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-custom-primary btn-lg">
+                <i class="fas fa-map me-2"></i>Go to Dashboard
+            </a>
+            <a href="{{ url_for('contact') }}" class="btn btn-custom-secondary btn-lg">
+                <i class="fas fa-envelope me-2"></i>Get in Touch
+            </a>
+            <a href="{{ url_for('index') }}" class="btn btn-custom-secondary btn-lg">
+                <i class="fas fa-arrow-left me-2"></i>Back Home
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer info about developers -->
+    <div class="alert alert-light border mb-5" style="border-color: #2d6f65 !important;">
+        <i class="fas fa-info-circle" style="color: #1a4d47;"></i>
+        <small class="ms-2" style="color: #5a7572;">
+            This project was developed in partnership with <strong>Spationex</strong>, a team dedicated to creating innovative solutions for regional development and community empowerment.
+        </small>
     </div>
 </div>
 {% endblock %}

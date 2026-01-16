@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}500 - Server Error{% endblock %}
+
+{% block extra_css %}
+<style>
+    .error-page {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .error-content {
+        text-align: center;
+    }
+    .error-code {
+        font-size: 8rem;
+        font-weight: 700;
+        color: #dc3545;
+        line-height: 1;
+    }
+    .error-heading {
+        color: #dc3545;
+        font-weight: 700;
+        margin: 20px 0;
+    }
+    .error-message {
+        font-size: 1.2rem;
+        color: #555;
+        margin-bottom: 30px;
+    }
+    .btn-home {
+        background-color: #1a4d47;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        font-size: 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: background-color 0.3s;
+    }
+    .btn-home:hover {
+        background-color: #0d3038;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container error-page">
+    <div class="error-content">
+        <div class="error-code">500</div>
+        <h1 class="error-heading">Server Error</h1>
+        <p class="error-message">
+            We're sorry! Something went wrong on our end. 
+            Our team has been notified and is working to fix it.
+        </p>
+        <p class="error-message">
+            Please try again later or contact support if the problem persists.
+        </p>
+        <a href="{{ url_for('dashboard') }}" class="btn-home">Go to Dashboard</a>
+    </div>
+</div>
+{% endblock %}
