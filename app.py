@@ -56,6 +56,17 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 # CSRF Protection
 csrf = CSRFProtect(app)
 
+# File upload configuration
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB in bytes
+
+# Ensure upload directory exists
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
+
 # Database connection string
 DATABASE_URL = os.getenv('DATABASE_URL')
 if not DATABASE_URL:
@@ -131,13 +142,13 @@ def close_connection(exception):
     if exception:
         logger.error(f'Request context error: {exception}')
 
-# Initialize database tables (only run once)
+# Initialize database tables
 _db_initialized = False
 
-def init_db():
+def init_db(force=False):
     """Initialize database tables if they don't exist"""
     global _db_initialized
-    if _db_initialized:
+    if _db_initialized and not force:
         return
     
     if not DATABASE_URL:
@@ -224,9 +235,9 @@ def init_db():
             temp_password = secrets.token_urlsafe(16)
             admin_hash = generate_password_hash(temp_password)
             cur.execute('''
-                INSERT INTO users (username, email, password_hash, is_admin, force_password_change)
-                VALUES (%s, %s, %s, %s, %s)
-            ''', ('admin', 'admin@kituihousing.com', admin_hash, True, True))
+                INSERT INTO users (username, email, password_hash, is_active, is_admin, force_password_change)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            ''', ('admin', 'info@spationex.com', admin_hash, True, True, True))
             logger.warning(f'DEFAULT ADMIN CREATED - TEMPORARY PASSWORD: {temp_password} - SET APP_ADMIN_PASSWORD IN .env IMMEDIATELY!')
         
         conn.commit()
@@ -235,6 +246,7 @@ def init_db():
         logger.info('Database initialized successfully')
     except Exception as e:
         logger.error(f'Error initializing database: {e}')
+        _db_initialized = False  # Reset flag so it can be retried
         raise
     finally:
         if conn:
@@ -326,21 +338,21 @@ def get_user_by_email(email):
         if conn:
             return_db_connection(conn)
 
-def create_user(username, email, password_hash):
+def create_user(username, email, password_hash, is_active=False, is_admin=False):
     """Create a new user"""
     conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute('''
-            INSERT INTO users (username, email, password_hash)
-            VALUES (%s, %s, %s)
+            INSERT INTO users (username, email, password_hash, is_active, is_admin)
+            VALUES (%s, %s, %s, %s, %s)
             RETURNING id
-        ''', (username, email, password_hash))
+        ''', (username, email, password_hash, is_active, is_admin))
         user_id = cur.fetchone()[0]
         conn.commit()
         cur.close()
-        logger.info(f'User created: {username}')
+        logger.info(f'User created: {username} (active: {is_active}, admin: {is_admin})')
         return user_id
     except psycopg2.IntegrityError as e:
         logger.warning(f'Integrity error creating user: {e}')
@@ -460,12 +472,126 @@ def log_audit_event(user_id, action, resource_type, resource_id, details=None):
         if conn:
             return_db_connection(conn)
 
+# User management functions
+def get_all_users():
+    """Get all users from database"""
+    if not DATABASE_URL:
+        return []
+    
+    # Ensure database is initialized
+    init_db()
+    
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute('''
+            SELECT id, username, email, is_active, is_admin, created_at
+            FROM users
+            ORDER BY created_at DESC
+        ''')
+        users = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dicts
+        result = []
+        for user in users:
+            result.append({
+                'id': user['id'],
+                'username': user['username'],
+                'email': user['email'],
+                'is_active': user['is_active'],
+                'is_admin': user['is_admin'],
+                'created_at': user['created_at'].strftime('%Y-%m-%d %H:%M:%S') if user['created_at'] else None
+            })
+        
+        return result
+    except Exception as e:
+        logger.error(f'Error loading users: {e}')
+        return []
+    finally:
+        if conn:
+            return_db_connection(conn)
+
+def update_user_status(user_id, is_active):
+    """Update user active status"""
+    if not DATABASE_URL:
+        raise ValueError('DATABASE_URL not set')
+    
+    # Ensure database is initialized
+    init_db()
+    
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        # Get user info for logging
+        cur.execute('SELECT username, email FROM users WHERE id = %s', (user_id,))
+        user_data = cur.fetchone()
+        if not user_data:
+            raise ValueError('User not found')
+        
+        cur.execute('UPDATE users SET is_active = %s WHERE id = %s', (is_active, user_id))
+        conn.commit()
+        cur.close()
+        
+        status = 'activated' if is_active else 'deactivated'
+        logger.info(f'User {status}: {user_data["username"]} (id: {user_id})')
+        return user_data['username']
+    except Exception as e:
+        logger.error(f'Error updating user status: {e}')
+        if conn:
+            conn.rollback()
+        raise
+    finally:
+        if conn:
+            return_db_connection(conn)
+
+def update_user_admin_status(user_id, is_admin):
+    """Update user admin status"""
+    if not DATABASE_URL:
+        raise ValueError('DATABASE_URL not set')
+    
+    # Ensure database is initialized
+    init_db()
+    
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        # Get user info for logging
+        cur.execute('SELECT username, email FROM users WHERE id = %s', (user_id,))
+        user_data = cur.fetchone()
+        if not user_data:
+            raise ValueError('User not found')
+        
+        cur.execute('UPDATE users SET is_admin = %s WHERE id = %s', (is_admin, user_id))
+        conn.commit()
+        cur.close()
+        
+        status = 'granted admin privileges' if is_admin else 'revoked admin privileges'
+        logger.info(f'User {status}: {user_data["username"]} (id: {user_id})')
+        return user_data['username']
+    except Exception as e:
+        logger.error(f'Error updating user admin status: {e}')
+        if conn:
+            conn.rollback()
+        raise
+    finally:
+        if conn:
+            return_db_connection(conn)
+
 # Database functions for projects
 def load_projects_from_db():
     """Load all projects from database"""
     if not DATABASE_URL:
         logger.warning('DATABASE_URL not set, falling back to JSON')
         return load_projects()
+    
+    # Ensure database is initialized
+    init_db()
     
     conn = None
     try:
@@ -513,6 +639,9 @@ def add_project_to_db(boma_id, name, status, units, image, lat, lon, description
     if not DATABASE_URL:
         raise ValueError('DATABASE_URL not set')
     
+    # Ensure database is initialized
+    init_db()
+    
     conn = None
     try:
         conn = get_db_connection()
@@ -538,6 +667,9 @@ def update_project_in_db(project_id, boma_id, name, status, units, image, lat, l
     """Update a project in database"""
     if not DATABASE_URL:
         raise ValueError('DATABASE_URL not set')
+    
+    # Ensure database is initialized
+    init_db()
     
     conn = None
     try:
@@ -565,6 +697,9 @@ def delete_project_from_db(project_id):
     if not DATABASE_URL:
         raise ValueError('DATABASE_URL not set')
     
+    # Ensure database is initialized
+    init_db()
+    
     conn = None
     try:
         conn = get_db_connection()
@@ -587,22 +722,25 @@ def delete_project_from_db(project_id):
         if conn:
             return_db_connection(conn)
 
-def migrate_projects_from_json():
+def migrate_projects_from_json(force=False):
     """Migrate projects from JSON file to database"""
     if not DATABASE_URL:
         logger.warning('DATABASE_URL not set, cannot migrate')
         return False
     
+    # Ensure database is initialized first
+    init_db()
+    
     conn = None
     try:
-        # Check if projects already exist in database
+        # Check if projects already exist in database (unless force is True)
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute('SELECT COUNT(*) FROM projects')
         count = cur.fetchone()[0]
         
-        if count > 0:
-            logger.info(f'Database already has {count} projects. Skipping migration.')
+        if count > 0 and not force:
+            logger.info(f'Database already has {count} projects. Skipping migration. Use force=True to migrate anyway.')
             cur.close()
             return True
         
@@ -684,6 +822,53 @@ def sanitize_html(html_string):
     # Remove any remaining script-like patterns
     html_string = re.sub(r'<script[^>]*>.*?</script>', '', html_string, flags=re.IGNORECASE | re.DOTALL)
     return html_string
+
+def allowed_file(filename):
+    """Check if file extension is allowed"""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def handle_image_upload(file, project_id=None):
+    """Handle image file upload and return the URL path"""
+    if not file or file.filename == '':
+        return None
+    
+    # Check file extension
+    if not allowed_file(file.filename):
+        raise ValueError('Invalid file type. Only image files (PNG, JPG, JPEG, GIF, WEBP) are allowed.')
+    
+    # Check file size
+    file.seek(0, os.SEEK_END)
+    file_size = file.tell()
+    file.seek(0)  # Reset file pointer
+    
+    if file_size > MAX_FILE_SIZE:
+        raise ValueError(f'File size exceeds maximum allowed size of {MAX_FILE_SIZE // (1024*1024)}MB.')
+    
+    # Generate unique filename
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    file_ext = file.filename.rsplit('.', 1)[1].lower()
+    base_name = secure_filename(file.filename.rsplit('.', 1)[0])
+    if project_id:
+        filename = f'project_{project_id}_{timestamp}_{base_name}.{file_ext}'
+    else:
+        filename = f'project_{timestamp}_{base_name}.{file_ext}'
+    
+    # Ensure filename is unique
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
+    counter = 1
+    while os.path.exists(filepath):
+        filename = f'project_{timestamp}_{base_name}_{counter}.{file_ext}'
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        counter += 1
+    
+    # Save file
+    try:
+        file.save(filepath)
+        # Return URL path (relative to static folder)
+        return url_for('static', filename=f'uploads/{filename}')
+    except Exception as e:
+        logger.error(f'Error saving uploaded file: {e}')
+        raise ValueError(f'Error saving file: {str(e)}')
 
 # Cache for projects data (in-memory cache) with thread safety
 _projects_cache = None
@@ -857,11 +1042,12 @@ def signup():
             flash('Email already registered!', 'danger')
             return redirect(url_for('signup'))
         
-        # Create user
+        # Create user (auto-activated, but not admin)
         try:
             password_hash = generate_password_hash(password)
-            user_id = create_user(username, email, password_hash)
-            flash('Account created successfully! Please log in.', 'success')
+            user_id = create_user(username, email, password_hash, is_active=True, is_admin=False)
+            flash('Account created successfully! You can now log in with your username or email.', 'success')
+            logger.info(f'New user registered and auto-activated: {username} ({email})')
             return redirect(url_for('login'))
         except ValueError as e:
             flash(str(e), 'danger')
@@ -875,11 +1061,11 @@ def signup():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('username', '').strip()
+        username_or_email = request.form.get('username', '').strip()
         password = request.form.get('password', '')
         
-        if not username or not password:
-            flash('Username and password are required!', 'danger')
+        if not username_or_email or not password:
+            flash('Username/Email and password are required!', 'danger')
             return redirect(url_for('login'))
         
         # Check for brute-force attempts (simplified)
@@ -892,11 +1078,11 @@ def login():
                 SELECT COUNT(*) FROM login_attempts 
                 WHERE username = %s AND success = FALSE 
                 AND attempted_at > CURRENT_TIMESTAMP - INTERVAL '15 minutes'
-            ''', (username,))
+            ''', (username_or_email,))
             failed_attempts = cur.fetchone()[0]
             
             if failed_attempts >= 5:
-                logger.warning(f'Brute-force attempt detected for user: {username}')
+                logger.warning(f'Brute-force attempt detected for user: {username_or_email}')
                 flash('Too many failed login attempts. Please try again later.', 'danger')
                 cur.close()
                 return redirect(url_for('login'))
@@ -908,11 +1094,15 @@ def login():
             if conn:
                 return_db_connection(conn)
         
-        user_data = get_user_by_username(username)
+        # Try to get user by username first, then by email
+        user_data = get_user_by_username(username_or_email)
+        if not user_data:
+            user_data = get_user_by_email(username_or_email)
+        
         if user_data and check_password_hash(user_data['password_hash'], password):
             if not user_data['is_active']:
-                logger.warning(f'Login attempt for inactive user: {username}')
-                flash('Your account has been deactivated. Please contact support.', 'danger')
+                logger.warning(f'Login attempt for inactive user: {username_or_email}')
+                flash('Your account has been deactivated. Please contact the administrator.', 'danger')
                 return redirect(url_for('login'))
             
             # Log successful login
@@ -922,7 +1112,7 @@ def login():
                 cur = conn.cursor()
                 cur.execute('''
                     INSERT INTO login_attempts (username, success) VALUES (%s, TRUE)
-                ''', (username,))
+                ''', (user_data['username'],))
                 conn.commit()
                 cur.close()
             except Exception as e:
@@ -939,7 +1129,7 @@ def login():
             )
             login_user(user, remember=True)
             session.permanent = True
-            logger.info(f'User logged in: {username}')
+            logger.info(f'User logged in: {user_data["username"]} (via {"email" if "@" in username_or_email else "username"})')
             
             # Check if user must change password
             if user_data.get('force_password_change'):
@@ -948,16 +1138,24 @@ def login():
             
             flash('Successfully logged in!', 'success')
             next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('admin'))
+            if next_page:
+                return redirect(next_page)
+            # Redirect admins to admin panel, regular users to dashboard
+            elif user_data['is_admin']:
+                return redirect(url_for('admin'))
+            else:
+                return redirect(url_for('dashboard'))
         else:
             # Log failed login attempt
             conn = None
             try:
                 conn = get_db_connection()
                 cur = conn.cursor()
+                # Use username_or_email for logging (extract username if it was an email)
+                log_username = username_or_email if '@' not in username_or_email else username_or_email.split('@')[0]
                 cur.execute('''
                     INSERT INTO login_attempts (username, success) VALUES (%s, FALSE)
-                ''', (username,))
+                ''', (log_username,))
                 conn.commit()
                 cur.close()
             except Exception as e:
@@ -966,8 +1164,8 @@ def login():
                 if conn:
                     return_db_connection(conn)
             
-            logger.warning(f'Failed login attempt: {username}')
-            flash('Invalid username or password!', 'danger')
+            logger.warning(f'Failed login attempt: {username_or_email}')
+            flash('Invalid username/email or password!', 'danger')
     
     return render_template('login.html')
 
@@ -1117,6 +1315,15 @@ def admin():
         flash('You do not have permission to access the admin panel.', 'danger')
         return redirect(url_for('dashboard'))
     
+    # Ensure database is initialized before any operations
+    if DATABASE_URL:
+        try:
+            init_db()
+        except Exception as e:
+            logger.error(f'Database initialization failed in admin route: {e}')
+            flash(f'Database error: {str(e)}. Please contact support.', 'danger')
+            # Still allow viewing, but operations will fail gracefully
+    
     if request.method == 'POST':
         action = request.form.get('action', '').strip()
         
@@ -1151,15 +1358,27 @@ def admin():
                     flash('Please provide valid latitude and longitude within Kenya.', 'danger')
                     return redirect(url_for('admin'))
                 
-                # Sanitize image URL (validate it's a URL, not a file path)
-                image = request.form.get('image', '').strip()
-                if image:
-                    if not (image.startswith('http://') or image.startswith('https://')):
-                        flash('Image must be a valid URL (http:// or https://).', 'danger')
-                        return redirect(url_for('admin'))
-                    if len(image) > 500:
-                        flash('Image URL is too long.', 'danger')
-                        return redirect(url_for('admin'))
+                # Handle image: prioritize file upload over URL
+                image = ''
+                if 'image_file' in request.files:
+                    file = request.files['image_file']
+                    if file and file.filename != '':
+                        try:
+                            image = handle_image_upload(file)
+                        except ValueError as e:
+                            flash(str(e), 'danger')
+                            return redirect(url_for('admin'))
+                
+                # If no file uploaded, use URL if provided
+                if not image:
+                    image = request.form.get('image', '').strip()
+                    if image:
+                        if not (image.startswith('http://') or image.startswith('https://')):
+                            flash('Image must be a valid URL (http:// or https://).', 'danger')
+                            return redirect(url_for('admin'))
+                        if len(image) > 500:
+                            flash('Image URL is too long.', 'danger')
+                            return redirect(url_for('admin'))
                 
                 # Sanitize description
                 description = request.form.get('description', '').strip()
@@ -1181,12 +1400,28 @@ def admin():
                 # Add project to database
                 try:
                     project_id = add_project_to_db(boma_id, name, status, units, image, lat, lon, description, unit_types, price_start)
+                    
+                    # If we uploaded a file but didn't have project_id, we could rename it here
+                    # But it's not necessary - the filename will work fine without project_id
+                    
                     log_audit_event(current_user.id, 'CREATE', 'project', name, f'New project added (id: {project_id})')
                     logger.info(f'Project created: {name} (id: {project_id}) by user: {current_user.username}')
                     flash(f'Project "{name}" added successfully!', 'success')
+                except psycopg2.Error as e:
+                    logger.error(f'Database error adding project: {e}')
+                    error_msg = str(e)
+                    if 'does not exist' in error_msg:
+                        # Try to initialize database again
+                        try:
+                            init_db(force=True)
+                            flash('Database was not initialized. Please try again.', 'warning')
+                        except Exception as init_error:
+                            flash(f'Database error: The projects table does not exist. Please contact support. Error: {init_error}', 'danger')
+                    else:
+                        flash(f'Database error: {error_msg}', 'danger')
                 except Exception as e:
                     logger.error(f'Error adding project: {e}')
-                    flash('Error adding project. Please try again.', 'danger')
+                    flash(f'Error adding project: {str(e)}', 'danger')
             
             elif action == 'edit':
                 try:
@@ -1243,14 +1478,47 @@ def admin():
                     flash('Please provide valid latitude and longitude within Kenya.', 'danger')
                     return redirect(url_for('admin'))
                 
-                image = request.form.get('image', '').strip()
-                if image:
-                    if not (image.startswith('http://') or image.startswith('https://')):
-                        flash('Image must be a valid URL (http:// or https://).', 'danger')
-                        return redirect(url_for('admin'))
-                    if len(image) > 500:
-                        flash('Image URL is too long.', 'danger')
-                        return redirect(url_for('admin'))
+                # Handle image: prioritize file upload over URL
+                # Get current image to preserve if no new image provided
+                conn = None
+                current_image = None
+                try:
+                    conn = get_db_connection()
+                    cur = conn.cursor()
+                    cur.execute('SELECT image FROM projects WHERE id = %s', (project_id,))
+                    result = cur.fetchone()
+                    if result:
+                        current_image = result[0]
+                    cur.close()
+                except Exception as e:
+                    logger.error(f'Error fetching current image: {e}')
+                finally:
+                    if conn:
+                        return_db_connection(conn)
+                
+                image = current_image  # Default to current image
+                
+                # Check for file upload first (highest priority)
+                if 'image_file' in request.files:
+                    file = request.files['image_file']
+                    if file and file.filename != '':
+                        try:
+                            image = handle_image_upload(file, project_id)
+                        except ValueError as e:
+                            flash(str(e), 'danger')
+                            return redirect(url_for('admin'))
+                
+                # If no file uploaded, check for URL input
+                elif not image or image == current_image:
+                    url_image = request.form.get('image', '').strip()
+                    if url_image:
+                        if not (url_image.startswith('http://') or url_image.startswith('https://')):
+                            flash('Image must be a valid URL (http:// or https://).', 'danger')
+                            return redirect(url_for('admin'))
+                        if len(url_image) > 500:
+                            flash('Image URL is too long.', 'danger')
+                            return redirect(url_for('admin'))
+                        image = url_image
                 
                 description = request.form.get('description', '').strip()
                 description = sanitize_html(description)
@@ -1274,9 +1542,21 @@ def admin():
                     log_audit_event(current_user.id, 'UPDATE', 'project', name, f'Updated from "{old_name}"')
                     logger.info(f'Project updated: {name} (was: {old_name}, id: {project_id}) by user: {current_user.username}')
                     flash(f'Project "{name}" updated successfully!', 'success')
+                except psycopg2.Error as e:
+                    logger.error(f'Database error updating project: {e}')
+                    error_msg = str(e)
+                    if 'does not exist' in error_msg:
+                        # Try to initialize database again
+                        try:
+                            init_db(force=True)
+                            flash('Database was not initialized. Please try again.', 'warning')
+                        except Exception as init_error:
+                            flash(f'Database error: The projects table does not exist. Please contact support. Error: {init_error}', 'danger')
+                    else:
+                        flash(f'Database error: {error_msg}', 'danger')
                 except Exception as e:
                     logger.error(f'Error updating project: {e}')
-                    flash('Error updating project. Please try again.', 'danger')
+                    flash(f'Error updating project: {str(e)}', 'danger')
             
             elif action == 'delete':
                 try:
@@ -1293,9 +1573,95 @@ def admin():
                     flash(f'Project "{project_name}" deleted successfully!', 'success')
                 except ValueError as e:
                     flash(str(e), 'danger')
+                except psycopg2.Error as e:
+                    logger.error(f'Database error deleting project: {e}')
+                    error_msg = str(e)
+                    if 'does not exist' in error_msg:
+                        # Try to initialize database again
+                        try:
+                            init_db(force=True)
+                            flash('Database was not initialized. Please try again.', 'warning')
+                        except Exception as init_error:
+                            flash(f'Database error: The projects table does not exist. Please contact support. Error: {init_error}', 'danger')
+                    else:
+                        flash(f'Database error: {error_msg}', 'danger')
                 except Exception as e:
                     logger.error(f'Error deleting project: {e}')
-                    flash('Error deleting project. Please try again.', 'danger')
+                    flash(f'Error deleting project: {str(e)}', 'danger')
+            
+            elif action == 'migrate':
+                # Migrate projects from JSON to database
+                try:
+                    result = migrate_projects_from_json(force=True)
+                    if result:
+                        log_audit_event(current_user.id, 'MIGRATE', 'project', 'all', 'Migrated projects from JSON to database')
+                        logger.info(f'Projects migrated by user: {current_user.username}')
+                        flash('Projects migrated successfully from JSON file!', 'success')
+                    else:
+                        flash('Migration failed. Please check the logs.', 'danger')
+                except Exception as e:
+                    logger.error(f'Error migrating projects: {e}')
+                    flash(f'Error during migration: {str(e)}', 'danger')
+            
+            elif action == 'activate_user':
+                # Activate a user account
+                try:
+                    user_id = int(request.form.get('user_id'))
+                    username = update_user_status(user_id, True)
+                    log_audit_event(current_user.id, 'ACTIVATE', 'user', username, f'User activated (id: {user_id})')
+                    flash(f'User "{username}" has been activated successfully!', 'success')
+                except ValueError as e:
+                    flash(str(e), 'danger')
+                except Exception as e:
+                    logger.error(f'Error activating user: {e}')
+                    flash(f'Error activating user: {str(e)}', 'danger')
+            
+            elif action == 'deactivate_user':
+                # Deactivate a user account
+                try:
+                    user_id = int(request.form.get('user_id'))
+                    if user_id == current_user.id:
+                        flash('You cannot deactivate your own account!', 'danger')
+                        return redirect(url_for('admin'))
+                    
+                    username = update_user_status(user_id, False)
+                    log_audit_event(current_user.id, 'DEACTIVATE', 'user', username, f'User deactivated (id: {user_id})')
+                    flash(f'User "{username}" has been deactivated successfully!', 'success')
+                except ValueError as e:
+                    flash(str(e), 'danger')
+                except Exception as e:
+                    logger.error(f'Error deactivating user: {e}')
+                    flash(f'Error deactivating user: {str(e)}', 'danger')
+            
+            elif action == 'grant_admin':
+                # Grant admin privileges to a user
+                try:
+                    user_id = int(request.form.get('user_id'))
+                    username = update_user_admin_status(user_id, True)
+                    log_audit_event(current_user.id, 'GRANT_ADMIN', 'user', username, f'Admin privileges granted (id: {user_id})')
+                    flash(f'Admin privileges granted to "{username}" successfully!', 'success')
+                except ValueError as e:
+                    flash(str(e), 'danger')
+                except Exception as e:
+                    logger.error(f'Error granting admin privileges: {e}')
+                    flash(f'Error granting admin privileges: {str(e)}', 'danger')
+            
+            elif action == 'revoke_admin':
+                # Revoke admin privileges from a user
+                try:
+                    user_id = int(request.form.get('user_id'))
+                    if user_id == current_user.id:
+                        flash('You cannot revoke your own admin privileges!', 'danger')
+                        return redirect(url_for('admin'))
+                    
+                    username = update_user_admin_status(user_id, False)
+                    log_audit_event(current_user.id, 'REVOKE_ADMIN', 'user', username, f'Admin privileges revoked (id: {user_id})')
+                    flash(f'Admin privileges revoked from "{username}" successfully!', 'success')
+                except ValueError as e:
+                    flash(str(e), 'danger')
+                except Exception as e:
+                    logger.error(f'Error revoking admin privileges: {e}')
+                    flash(f'Error revoking admin privileges: {str(e)}', 'danger')
             
             else:
                 logger.warning(f'Unknown admin action attempted: {action} by user: {current_user.username}')
@@ -1308,7 +1674,8 @@ def admin():
         return redirect(url_for('admin'))
     
     projects = load_projects_from_db()
-    return render_template('admin.html', projects=projects)
+    users = get_all_users()
+    return render_template('admin.html', projects=projects, users=users)
 
 @app.route('/api/projects')
 def get_projects():
