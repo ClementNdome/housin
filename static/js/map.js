@@ -34,6 +34,10 @@ const basemaps = {
 };
 
 $(document).ready(function() {
+    // Show map and hide loading indicator
+    $('#map').show();
+    $('#map-loading').hide();
+    
     // Initialize map centered on Kitui County
     map = L.map('map').setView([-1.374, 38.010], 10);
     
@@ -44,12 +48,17 @@ $(document).ready(function() {
     // Add basemap selector control
     addBasemapSelector();
 
-    // Fetch projects and add markers
-    $.get('/api/projects', function(data) {
-        projects = data;
-        addMarkersToMap(projects);
-        loadFavorites();
-    });
+    // Fetch projects and add markers (with error handling)
+    $.get('/api/projects')
+        .done(function(data) {
+            projects = data;
+            addMarkersToMap(projects);
+            loadFavorites();
+        })
+        .fail(function() {
+            console.error('Failed to load projects');
+            $('#map-loading').html('<div class="alert alert-warning">Failed to load projects. Please refresh the page.</div>');
+        });
 });
 
 function switchBasemap(basemapName) {
