@@ -10,7 +10,6 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime, timedelta
 import secrets
-import logging
 import threading
 import shutil
 from pathlib import Path
@@ -20,16 +19,20 @@ import re
 # Load environment variables from .env file if it exists
 load_dotenv()
 
-# Set up logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('app.log'),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger(__name__)
+# No-op logger for deployment environments that don't accept logging
+# All logger calls will work but won't actually log anything
+class NoOpLogger:
+    """A logger that does nothing - all methods are no-ops"""
+    def debug(self, *args, **kwargs): pass
+    def info(self, *args, **kwargs): pass
+    def warning(self, *args, **kwargs): pass
+    def error(self, *args, **kwargs): pass
+    def critical(self, *args, **kwargs): pass
+    def exception(self, *args, **kwargs): pass
+    def setLevel(self, *args, **kwargs): pass
+    def addHandler(self, *args, **kwargs): pass
+
+logger = NoOpLogger()
 
 app = Flask(__name__)
 
