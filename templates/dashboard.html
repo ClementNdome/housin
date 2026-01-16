@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Kitui Housing{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        <!-- Sidebar -->
+        <div class="col-lg-3 col-md-4 sidebar bg-light p-3" style="height: calc(100vh - 76px); overflow-y: auto;">
+            <h4 class="mb-4">🔍 Search Projects</h4>
+            
+            <!-- Search Form -->
+            <form id="search-form" class="mb-4">
+                <div class="input-group">
+                    <input type="text" 
+                           id="search-input" 
+                           class="form-control" 
+                           placeholder="Search project..." 
+                           autocomplete="off"
+                           aria-label="Search projects"
+                           list="projects-list">
+                    <datalist id="projects-list"></datalist>
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </form>
+
+            <!-- Project Details Panel -->
+            <div id="project-details" class="mt-4">
+                <div class="text-center text-muted">
+                    <p>Select a project from the map or search to view details</p>
+                </div>
+            </div>
+
+            <!-- Favorites Section -->
+            <div class="mt-4">
+                <h5>⭐ Favorites</h5>
+                <div id="favorites-list" class="list-group">
+                    <!-- Favorites will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Container -->
+        <div class="col-lg-9 col-md-8">
+            <div id="map" style="height: calc(100vh - 76px); width: 100%;"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+<script src="{{ url_for('static', filename='js/search.js') }}"></script>
+{% endblock %}
