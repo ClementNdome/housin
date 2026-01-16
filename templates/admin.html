@@ -10,13 +10,33 @@
         padding: 2rem;
         border-radius: 10px;
         margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     .stat-card {
         border-left: 4px solid #1a4d47;
-        transition: transform 0.2s;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 1px solid #e0e0e0;
+        height: 100%;
     }
     .stat-card:hover {
-        transform: translateY(-2px);
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .stat-card .card-body {
+        padding: 1.5rem;
+    }
+    .stat-card h6 {
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+    }
+    .stat-card h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1a4d47;
+        margin-top: 0.5rem;
     }
     .project-table {
         font-size: 0.9rem;
@@ -27,9 +47,113 @@
     }
     .action-buttons .btn {
         margin-right: 0.25rem;
+        font-size: 0.85rem;
     }
-    .card-header {
-        background-color: #1a4d47 !important;
+    .nav-tabs {
+        border-bottom: 2px solid #dee2e6;
+        margin-bottom: 1.5rem;
+    }
+    .nav-tabs .nav-link {
+        color: #6c757d;
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s;
+    }
+    .nav-tabs .nav-link:hover {
+        border-color: transparent;
+        border-bottom-color: #1a4d47;
+        color: #1a4d47;
+    }
+    .nav-tabs .nav-link.active {
+        color: #1a4d47;
+        background-color: transparent;
+        border: none;
+        border-bottom: 3px solid #1a4d47;
+        font-weight: 600;
+    }
+    .tab-content {
+        padding: 0;
+    }
+    .section-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 1rem 1.5rem;
+        border-bottom: 2px solid #1a4d47;
+        margin: -1rem -1rem 1.5rem -1rem;
+    }
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1a4d47;
+        margin: 0;
+    }
+    .form-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        border: 1px solid #e0e0e0;
+    }
+    .table-section {
+        background: white;
+    }
+    .card-custom {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+    .card-header-custom {
+        background: linear-gradient(135deg, #1a4d47 0%, #2d6f65 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        font-weight: 600;
+        border: none;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #1a4d47;
+        box-shadow: 0 0 0 0.2rem rgba(26, 77, 71, 0.25);
+    }
+    .btn-primary {
+        background-color: #1a4d47;
+        border-color: #1a4d47;
+    }
+    .btn-primary:hover {
+        background-color: #153d38;
+        border-color: #153d38;
+    }
+    .btn-success {
+        background-color: #28a745;
+    }
+    .collapsible-toggle {
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.2s;
+    }
+    .collapsible-toggle:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    .collapsible-toggle[aria-expanded="false"] .fa-chevron-down {
+        transform: rotate(-90deg);
+        transition: transform 0.3s;
+    }
+    .table-hover tbody tr:hover {
+        background-color: rgba(26, 77, 71, 0.05);
+    }
+    .empty-state {
+        padding: 3rem;
+        text-align: center;
+        color: #6c757d;
+    }
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
     }
 </style>
 {% endblock %}
@@ -38,13 +162,16 @@
 <div class="container-fluid my-4">
     <!-- Admin Header -->
     <div class="admin-header">
-        <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
             <div>
-                <h1 class="mb-1"><i class="fas fa-lock me-2"></i>Admin Panel</h1>
-                <p class="mb-0">Manage housing projects in Kitui County</p>
+                <h1 class="mb-1"><i class="fas fa-building me-2"></i>Administrative Dashboard</h1>
+                <p class="mb-0 opacity-75">Comprehensive management center for Kitui County Housing Projects</p>
             </div>
-            <div>
-                <a href="{{ url_for('logout') }}" class="btn btn-light">
+            <div class="mt-2 mt-md-0">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-light me-2" target="_blank">
+                    <i class="fas fa-external-link-alt me-2"></i>View Public Dashboard
+                </a>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-light">
                     <i class="fas fa-sign-out-alt me-2"></i>Logout
                 </a>
             </div>
@@ -53,196 +180,355 @@
 
     <!-- Statistics Cards -->
     <div class="row mb-4">
-        <div class="col-md-3 mb-3">
+        <div class="col-lg-3 col-md-6 mb-3">
             <div class="card stat-card h-100">
                 <div class="card-body">
-                    <h6 class="text-muted mb-2">Total Projects</h6>
+                    <h6><i class="fas fa-city me-2"></i>Total Projects</h6>
                     <h2 class="mb-0">{{ projects|length }}</h2>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-lg-3 col-md-6 mb-3">
             <div class="card stat-card h-100">
                 <div class="card-body">
-                    <h6 class="text-muted mb-2">Total Units</h6>
+                    <h6><i class="fas fa-home me-2"></i>Total Units</h6>
                     <h2 class="mb-0" id="total-units-stat">-</h2>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-lg-3 col-md-6 mb-3">
             <div class="card stat-card h-100">
                 <div class="card-body">
-                    <h6 class="text-muted mb-2">Ongoing Projects</h6>
+                    <h6><i class="fas fa-hard-hat me-2"></i>Ongoing Projects</h6>
                     <h2 class="mb-0" id="ongoing-stat">-</h2>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-lg-3 col-md-6 mb-3">
             <div class="card stat-card h-100">
                 <div class="card-body">
-                    <h6 class="text-muted mb-2">Completed Projects</h6>
+                    <h6><i class="fas fa-check-circle me-2"></i>Completed Projects</h6>
                     <h2 class="mb-0" id="completed-stat">-</h2>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <!-- Add Project Form -->
-        <div class="col-lg-4 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header text-white">
-                    <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Add New Project</h5>
+    <!-- Tab Navigation -->
+    <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="projects-tab" data-bs-toggle="tab" data-bs-target="#projects-pane" type="button" role="tab">
+                <i class="fas fa-building me-2"></i>Housing Projects
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-pane" type="button" role="tab">
+                <i class="fas fa-users me-2"></i>User Management
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="adminTabContent">
+
+        <!-- Housing Projects Tab -->
+        <div class="tab-pane fade show active" id="projects-pane" role="tabpanel" aria-labelledby="projects-tab">
+            <div class="row">
+                <!-- Projects Table - Main Section -->
+                <div class="col-lg-12 mb-4">
+                    <div class="card card-custom">
+                        <div class="card-header-custom d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0"><i class="fas fa-list me-2"></i>All Projects ({{ projects|length }})</h5>
+                            </div>
+                            <div>
+                                <form method="POST" action="{{ url_for('admin') }}" style="display: inline;" onsubmit="return confirm('This will import all projects from projects.json file. Continue?')">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <input type="hidden" name="action" value="migrate">
+                                    <button type="submit" class="btn btn-sm btn-light" title="Import projects from JSON file">
+                                        <i class="fas fa-upload me-1"></i>Import from JSON
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            {% if projects %}
+                            <div class="table-responsive">
+                                <table class="table table-hover project-table mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 10%;">Boma ID</th>
+                                            <th style="width: 25%;">Project Name</th>
+                                            <th style="width: 15%;">Status</th>
+                                            <th style="width: 10%;">Units</th>
+                                            <th style="width: 15%;">Price Range</th>
+                                            <th style="width: 10%;">Location</th>
+                                            <th style="width: 15%;" class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for project in projects %}
+                                        <tr>
+                                            <td><code class="small">{{ project.boma_id or 'N/A' }}</code></td>
+                                            <td>
+                                                <strong>{{ project.name }}</strong>
+                                                {% if project.description %}
+                                                <br><small class="text-muted">{{ project.description[:60] }}{% if project.description|length > 60 %}...{% endif %}</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if project.status == 'complete' %}
+                                                    <span class="badge bg-success badge-status">Complete</span>
+                                                {% elif project.status == 'ongoing' %}
+                                                    <span class="badge bg-warning text-dark badge-status">Ongoing</span>
+                                                {% elif project.status == 'nearing completion' %}
+                                                    <span class="badge bg-info badge-status">Nearing Completion</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary badge-status">Planned</span>
+                                                {% endif %}
+                                            </td>
+                                            <td><strong>{{ project.units|int }}</strong></td>
+                                            <td>
+                                                {% if project.price_start %}
+                                                    <span class="price-value">{{ project.price_start }}</span>
+                                                {% else %}
+                                                    <span class="text-muted">N/A</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                                    {{ "%.3f"|format(project.lat) }}, {{ "%.3f"|format(project.lon) }}
+                                                </small>
+                                            </td>
+                                            <td class="text-end action-buttons">
+                                                <button class="btn btn-sm btn-primary" onclick="editProject({{ project.id }})" title="Edit Project">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <form method="POST" action="{{ url_for('admin') }}" style="display: inline;" onsubmit="return confirmDelete('{{ project.name }}')">
+                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                    <input type="hidden" name="action" value="delete">
+                                                    <input type="hidden" name="project_id" value="{{ project.id }}">
+                                                    <button type="submit" class="btn btn-sm btn-danger" title="Delete Project">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <p class="mb-0">No projects found. Add your first project using the form below.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <form method="POST" action="{{ url_for('admin') }}" id="add-form">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <input type="hidden" name="action" value="add">
-                        
-                        <div class="mb-3">
-                            <label for="add-boma_id" class="form-label">Boma ID</label>
-                            <input type="text" class="form-control" id="add-boma_id" name="boma_id" placeholder="N/A">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="add-name" class="form-label">Project Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="add-name" name="name" required>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="add-status" class="form-label">Status <span class="text-danger">*</span></label>
-                                <select class="form-select" id="add-status" name="status" required>
-                                    <option value="planned">Planned</option>
-                                    <option value="ongoing" selected>Ongoing</option>
-                                    <option value="nearing completion">Nearing Completion</option>
-                                    <option value="complete">Complete</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="add-units" class="form-label">Units <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" id="add-units" name="units" min="0" required>
+
+                <!-- Add New Project Form - Collapsible Section -->
+                <div class="col-lg-12">
+                    <div class="card card-custom">
+                        <div class="card-header-custom collapsible-toggle" data-bs-toggle="collapse" data-bs-target="#addProjectForm" aria-expanded="true">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Add New Project</h5>
+                                <i class="fas fa-chevron-down"></i>
                             </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label for="add-image" class="form-label">Image URL</label>
-                            <input type="url" class="form-control" id="add-image" name="image" placeholder="https://example.com/image.jpg">
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="add-lat" class="form-label">Latitude <span class="text-danger">*</span></label>
-                                <input type="number" step="any" class="form-control" id="add-lat" name="lat" placeholder="-1.374" required>
+                        <div class="collapse show" id="addProjectForm">
+                            <div class="card-body">
+                                <form method="POST" action="{{ url_for('admin') }}" id="add-form" enctype="multipart/form-data">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <input type="hidden" name="action" value="add">
+                                    
+                                    <div class="row">
+                                        <div class="col-md-8 mb-3">
+                                            <label for="add-name" class="form-label">Project Name <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="add-name" name="name" required placeholder="e.g., Kitui Affordable Housing Phase 1">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="add-boma_id" class="form-label">Boma ID</label>
+                                            <input type="text" class="form-control" id="add-boma_id" name="boma_id" placeholder="Optional">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="add-status" class="form-label">Status <span class="text-danger">*</span></label>
+                                            <select class="form-select" id="add-status" name="status" required>
+                                                <option value="planned">Planned</option>
+                                                <option value="ongoing" selected>Ongoing</option>
+                                                <option value="nearing completion">Nearing Completion</option>
+                                                <option value="complete">Complete</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="add-units" class="form-label">Total Units <span class="text-danger">*</span></label>
+                                            <input type="number" class="form-control" id="add-units" name="units" min="0" required placeholder="0">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="add-unit_types" class="form-label">Unit Types</label>
+                                            <input type="text" class="form-control" id="add-unit_types" name="unit_types" placeholder="e.g., Studio, 1-3 Bedroom">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="add-price_start" class="form-label">Price Start (KES)</label>
+                                            <input type="number" class="form-control" id="add-price_start" name="price_start" min="0" placeholder="e.g., 640000">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="add-lat" class="form-label">Latitude <span class="text-danger">*</span></label>
+                                            <input type="number" step="any" class="form-control" id="add-lat" name="lat" placeholder="-1.374" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="add-lon" class="form-label">Longitude <span class="text-danger">*</span></label>
+                                            <input type="number" step="any" class="form-control" id="add-lon" name="lon" placeholder="38.010" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="add-image-file" class="form-label">Project Image</label>
+                                        <input type="file" class="form-control" id="add-image-file" name="image_file" accept="image/*">
+                                        <small class="form-text text-muted">Upload an image file (max 5MB) or use URL below</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="add-image" class="form-label">Image URL (Alternative)</label>
+                                        <input type="url" class="form-control" id="add-image" name="image" placeholder="https://example.com/image.jpg">
+                                        <small class="form-text text-muted">Or provide an image URL instead</small>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="add-description" class="form-label">Description</label>
+                                        <textarea class="form-control" id="add-description" name="description" rows="3" placeholder="Brief description of the housing project..."></textarea>
+                                    </div>
+                                    
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-plus-circle me-2"></i>Add Project
+                                        </button>
+                                        <button type="reset" class="btn btn-outline-secondary" onclick="resetAddForm()">
+                                            <i class="fas fa-undo me-2"></i>Clear Form
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="add-lon" class="form-label">Longitude <span class="text-danger">*</span></label>
-                                <input type="number" step="any" class="form-control" id="add-lon" name="lon" placeholder="38.010" required>
-                            </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label for="add-description" class="form-label">Description</label>
-                            <textarea class="form-control" id="add-description" name="description" rows="3" placeholder="Project description..."></textarea>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="add-unit_types" class="form-label">Unit Types</label>
-                                <input type="text" class="form-control" id="add-unit_types" name="unit_types" placeholder="Studio, 1-3 Bedroom">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="add-price_start" class="form-label">Price Start (KES)</label>
-                                <input type="number" class="form-control" id="add-price_start" name="price_start" min="0" placeholder="640000">
-                            </div>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-success w-100">
-                            <i class="bi bi-plus-circle"></i> Add Project
-                        </button>
-                        <button type="reset" class="btn btn-outline-secondary w-100 mt-2" onclick="resetAddForm()">
-                            Clear Form
-                        </button>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Existing Projects Table -->
-        <div class="col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">📋 Existing Projects ({{ projects|length }})</h5>
-                    <a href="{{ url_for('dashboard') }}" class="btn btn-sm btn-light" target="_blank">
-                        View Dashboard
-                    </a>
-                </div>
-                <div class="card-body p-0">
-                    {% if projects %}
-                    <div class="table-responsive">
-                        <table class="table table-hover project-table mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Status</th>
-                                    <th>Units</th>
-                                    <th>Price</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for project in projects %}
-                                <tr>
-                                    <td><code>{{ project.boma_id }}</code></td>
-                                    <td>
-                                        <strong>{{ project.name }}</strong>
-                                        {% if project.description %}
-                                        <br><small class="text-muted">{{ project.description[:50] }}{% if project.description|length > 50 %}...{% endif %}</small>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if project.status == 'complete' %}
-                                            <span class="badge bg-success badge-status">Complete</span>
-                                        {% elif project.status == 'ongoing' %}
-                                            <span class="badge bg-warning badge-status">Ongoing</span>
-                                        {% elif project.status == 'nearing completion' %}
-                                            <span class="badge bg-info badge-status">Nearing Completion</span>
-                                        {% else %}
-                                            <span class="badge bg-secondary badge-status">Planned</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ project.units|int }}</td>
-                                    <td>
-                                        {% if project.price_start %}
-                                            <span class="price-value">{{ project.price_start }}</span>
-                                        {% else %}
-                                            <span class="text-muted">N/A</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="action-buttons">
-                                        <button class="btn btn-sm btn-primary" onclick="editProject({{ project.id }})" title="Edit">
-                                            <i class="fas fa-edit me-1"></i>Edit
-                                        </button>
-                                        <form method="POST" action="{{ url_for('admin') }}" style="display: inline;" onsubmit="return confirmDelete('{{ project.name }}')">
-                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                                            <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="project_id" value="{{ project.id }}">
-                                            <button type="submit" class="btn btn-sm btn-danger" title="Delete">
-                                                <i class="fas fa-trash me-1"></i>Delete
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+        <!-- User Management Tab -->
+        <div class="tab-pane fade" id="users-pane" role="tabpanel" aria-labelledby="users-tab">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card card-custom">
+                        <div class="card-header-custom">
+                            <h5 class="mb-0"><i class="fas fa-users me-2"></i>User Management ({{ users|length }} users)</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            {% if users %}
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 5%;">ID</th>
+                                            <th style="width: 15%;">Username</th>
+                                            <th style="width: 20%;">Email</th>
+                                            <th style="width: 12%;">Status</th>
+                                            <th style="width: 12%;">Role</th>
+                                            <th style="width: 15%;">Created</th>
+                                            <th style="width: 21%;" class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for user in users %}
+                                        <tr class="{% if not user.is_active %}table-warning{% endif %}">
+                                            <td>{{ user.id }}</td>
+                                            <td><strong>{{ user.username }}</strong></td>
+                                            <td>{{ user.email }}</td>
+                                            <td>
+                                                {% if user.is_active %}
+                                                    <span class="badge bg-success">Active</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning text-dark">Pending Approval</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if user.is_admin %}
+                                                    <span class="badge bg-danger">Admin</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">User</span>
+                                                {% endif %}
+                                            </td>
+                                            <td><small class="text-muted">{{ user.created_at }}</small></td>
+                                            <td class="text-end">
+                                                {% if not user.is_active %}
+                                                    <form method="POST" action="{{ url_for('admin') }}" style="display: inline;">
+                                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                        <input type="hidden" name="action" value="activate_user">
+                                                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                                                        <button type="submit" class="btn btn-sm btn-success" title="Activate User">
+                                                            <i class="fas fa-check me-1"></i>Activate
+                                                        </button>
+                                                    </form>
+                                                {% else %}
+                                                    {% if user.id != current_user.id %}
+                                                    <form method="POST" action="{{ url_for('admin') }}" style="display: inline;">
+                                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                        <input type="hidden" name="action" value="deactivate_user">
+                                                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                                                        <button type="submit" class="btn btn-sm btn-warning" title="Deactivate User" onclick="return confirm('Are you sure you want to deactivate this user?')">
+                                                            <i class="fas fa-times me-1"></i>Deactivate
+                                                        </button>
+                                                    </form>
+                                                    {% endif %}
+                                                {% endif %}
+                                                
+                                                {% if not user.is_admin %}
+                                                    <form method="POST" action="{{ url_for('admin') }}" style="display: inline;">
+                                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                        <input type="hidden" name="action" value="grant_admin">
+                                                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                                                        <button type="submit" class="btn btn-sm btn-info" title="Grant Admin Privileges" onclick="return confirm('Grant admin privileges to {{ user.username }}?')">
+                                                            <i class="fas fa-shield-alt me-1"></i>Grant Admin
+                                                        </button>
+                                                    </form>
+                                                {% else %}
+                                                    {% if user.id != current_user.id %}
+                                                    <form method="POST" action="{{ url_for('admin') }}" style="display: inline;">
+                                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                        <input type="hidden" name="action" value="revoke_admin">
+                                                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                                                        <button type="submit" class="btn btn-sm btn-danger" title="Revoke Admin Privileges" onclick="return confirm('Revoke admin privileges from {{ user.username }}?')">
+                                                            <i class="fas fa-ban me-1"></i>Revoke Admin
+                                                        </button>
+                                                    </form>
+                                                    {% else %}
+                                                    <span class="badge bg-primary">Current User</span>
+                                                    {% endif %}
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-users"></i>
+                                <p class="mb-0">No users found.</p>
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
-                    {% else %}
-                    <div class="text-center p-5">
-                        <p class="text-muted">No projects found. Add your first project using the form on the left.</p>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
@@ -253,24 +539,25 @@
 <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header text-white" style="background-color: #1a4d47;">
+            <div class="modal-header text-white" style="background: linear-gradient(135deg, #1a4d47 0%, #2d6f65 100%);">
                 <h5 class="modal-title" id="editModalLabel"><i class="fas fa-edit me-2"></i>Edit Project</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form method="POST" action="{{ url_for('admin') }}" id="edit-form">
+                <form method="POST" action="{{ url_for('admin') }}" id="edit-form" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <input type="hidden" name="action" value="edit">
                     <input type="hidden" name="project_id" id="edit-project_id">
                     
-                    <div class="mb-3">
-                        <label for="edit-boma_id" class="form-label">Boma ID</label>
-                        <input type="text" class="form-control" id="edit-boma_id" name="boma_id">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="edit-name" class="form-label">Project Name <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="edit-name" name="name" required>
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label for="edit-name" class="form-label">Project Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="edit-name" name="name" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="edit-boma_id" class="form-label">Boma ID</label>
+                            <input type="text" class="form-control" id="edit-boma_id" name="boma_id">
+                        </div>
                     </div>
                     
                     <div class="row">
@@ -284,14 +571,20 @@
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="edit-units" class="form-label">Units <span class="text-danger">*</span></label>
+                            <label for="edit-units" class="form-label">Total Units <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="edit-units" name="units" min="0" required>
                         </div>
                     </div>
                     
-                    <div class="mb-3">
-                        <label for="edit-image" class="form-label">Image URL</label>
-                        <input type="url" class="form-control" id="edit-image" name="image">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="edit-unit_types" class="form-label">Unit Types</label>
+                            <input type="text" class="form-control" id="edit-unit_types" name="unit_types">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit-price_start" class="form-label">Price Start (KES)</label>
+                            <input type="number" class="form-control" id="edit-price_start" name="price_start" min="0">
+                        </div>
                     </div>
                     
                     <div class="row">
@@ -306,24 +599,28 @@
                     </div>
                     
                     <div class="mb-3">
+                        <label for="edit-image-file" class="form-label">Project Image</label>
+                        <input type="file" class="form-control" id="edit-image-file" name="image_file" accept="image/*">
+                        <small class="form-text text-muted">Upload an image file (max 5MB) or use URL below</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-image" class="form-label">Image URL (Alternative)</label>
+                        <input type="url" class="form-control" id="edit-image" name="image" placeholder="https://example.com/image.jpg">
+                        <small class="form-text text-muted">Or provide an image URL instead</small>
+                    </div>
+                    
+                    <div class="mb-3">
                         <label for="edit-description" class="form-label">Description</label>
                         <textarea class="form-control" id="edit-description" name="description" rows="3"></textarea>
                     </div>
                     
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="edit-unit_types" class="form-label">Unit Types</label>
-                            <input type="text" class="form-control" id="edit-unit_types" name="unit_types">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="edit-price_start" class="form-label">Price Start (KES)</label>
-                            <input type="number" class="form-control" id="edit-price_start" name="price_start" min="0">
-                        </div>
-                    </div>
-                    
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
                     </div>
                 </form>
             </div>
@@ -336,15 +633,19 @@ const projects = {{ projects | tojson }};
 
 // Calculate and display statistics
 (function() {
-    const totalUnits = projects.reduce((sum, p) => sum + (p.units || 0), 0);
+    const totalUnits = projects.reduce((sum, p) => sum + (parseInt(p.units) || 0), 0);
     const ongoing = projects.filter(p => p.status === 'ongoing').length;
     const completed = projects.filter(p => p.status === 'complete').length;
     
-    document.getElementById('total-units-stat').textContent = totalUnits.toLocaleString();
-    document.getElementById('ongoing-stat').textContent = ongoing;
-    document.getElementById('completed-stat').textContent = completed;
+    const totalUnitsEl = document.getElementById('total-units-stat');
+    const ongoingEl = document.getElementById('ongoing-stat');
+    const completedEl = document.getElementById('completed-stat');
     
-    // Format price values
+    if (totalUnitsEl) totalUnitsEl.textContent = totalUnits.toLocaleString();
+    if (ongoingEl) ongoingEl.textContent = ongoing;
+    if (completedEl) completedEl.textContent = completed;
+    
+    // Format price values in table
     document.querySelectorAll('.price-value').forEach(el => {
         const value = parseInt(el.textContent);
         if (!isNaN(value)) {
@@ -360,6 +661,7 @@ function editProject(projectId) {
         return;
     }
     
+    // Populate edit form fields
     document.getElementById('edit-project_id').value = project.id;
     document.getElementById('edit-boma_id').value = project.boma_id || '';
     document.getElementById('edit-name').value = project.name || '';
@@ -372,6 +674,14 @@ function editProject(projectId) {
     document.getElementById('edit-unit_types').value = project.unit_types || '';
     document.getElementById('edit-price_start').value = project.price_start || '';
     
+    // Show modal - switch to projects tab if needed
+    const projectsTab = document.getElementById('projects-tab');
+    const usersTab = document.getElementById('users-tab');
+    if (usersTab && usersTab.classList.contains('active')) {
+        const projectsTabTrigger = new bootstrap.Tab(projectsTab);
+        projectsTabTrigger.show();
+    }
+    
     const modal = new bootstrap.Modal(document.getElementById('editModal'));
     modal.show();
 }
@@ -381,8 +691,26 @@ function confirmDelete(projectName) {
 }
 
 function resetAddForm() {
-    document.getElementById('add-form').reset();
+    const form = document.getElementById('add-form');
+    if (form) {
+        form.reset();
+    }
 }
+
+// Handle collapsible toggle icon rotation
+document.addEventListener('DOMContentLoaded', function() {
+    const addProjectForm = document.getElementById('addProjectForm');
+    const toggle = addProjectForm ? addProjectForm.previousElementSibling : null;
+    
+    if (toggle && addProjectForm) {
+        addProjectForm.addEventListener('show.bs.collapse', function() {
+            toggle.setAttribute('aria-expanded', 'true');
+        });
+        addProjectForm.addEventListener('hide.bs.collapse', function() {
+            toggle.setAttribute('aria-expanded', 'false');
+        });
+    }
+});
 
 // Auto-dismiss alerts after 5 seconds
 setTimeout(function() {
