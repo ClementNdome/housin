@@ -1,0 +1,62 @@
+[
+    {
+    "boma_id": "78",
+    "name": "Kwa Ngendu AHP",
+    "status": "ongoing",
+    "units": 166,
+    "image": "https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=10230473600007733",
+    "lat": -1.357222,
+    "lon": 38.016111,
+    "description": "Attractive development located in Kitui Town along Jika Road, Kitui County. Includes 166 housing units, 6 shops on the ground floor, fronting tarmacked access road, and 54 parking spots. Amenities: landscaped green spaces, children's play area, secured fence, borehole, cabro paved driveways, gate and guard house, garbage receptacles.",
+    "unit_types": "Studio, 1-3 Bedroom",
+    "price_start": 640000
+    },
+    {
+    "boma_id": "28",
+    "name": "Kitui Affordable Housing Kalawa Rd",
+    "status": "nearing completion",
+    "units": 509,
+    "image": "https://addedvaluegroup.co/wp-content/uploads/2020/12/Kitui3.jpg",
+    "lat": -1.36789,
+    "lon": 38.0266,
+    "description": "Public Private Partnership between Kitui County Government and Tecnofin Kenya Ltd, located along Kalawa Road opposite WARMA offices in Kitui Town. In line with the Affordable Housing pillar of the Big 4 Agenda. Planned completion within 24 months from December 2020 launch.",
+    "unit_types": "1 Bedroom (30m²), 2 Bedroom (45m²), 3 Bedroom (60m²), 3 Bedroom Deluxe (80m²)",
+    "price_start": 1500000
+    },
+    {
+    "boma_id": "N/A",
+    "name": "Mwingi Kwa Ngendu Affordable Housing Project",
+    "status": "ongoing",
+    "units": 2000,
+    "image": "https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=10230473600007733",
+    "lat": -0.9344,
+    "lon": 38.0601,
+    "description": "Part of the larger affordable housing initiative in Kitui County, with Ksh15B allocated for 6000 houses across the county, including markets and hostels. Ongoing project in Mwingi Town, set for inspection as part of transforming lives in Lower Eastern region.",
+    "unit_types": "Various (Studio to 3 Bedroom)",
+    "price_start": 640000
+    },
+    {
+    "boma_id": "N/A",
+    "name": "Civil Servants Housing Scheme Kitui",
+    "status": "planned",
+    "units": 400,
+    "image": "https://addedvaluegroup.co/wp-content/uploads/2020/12/Kitui3.jpg",
+    "lat": -1.375081,
+    "lon": 37.995213,
+    "description": "Part of the Affordable Housing Program pipeline, Civil Servants Housing Scheme in Kitui, Kitui County, on 2 acres of land. Aimed at providing housing for civil servants with loans up to KShs 20 million depending on seniority.",
+    "unit_types": "Various",
+    "price_start": null
+    },
+    {
+    "boma_id": "N/A",
+    "name": "Manyenyoni Affordable Housing Project",
+    "status": "ongoing",
+    "units": 205,
+    "image": "https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=2174058446060524",
+    "lat": -1.38276,
+    "lon": 37.99569,
+    "description": "Ksh. 475 million project in Manyenyoni, Kitui Town, comprising four residential blocks each four storeys high, delivering 205 housing units and social amenities. Part of Kitui County's affordable housing program.",
+    "unit_types": "Various",
+    "price_start": null
+    }
+    ]
