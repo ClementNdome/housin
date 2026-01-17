@@ -1,0 +1,29 @@
+{
+    "name": "Kitui Housing Dashboard - Explore Affordable Housing Projects",
+    "short_name": "Kitui Housing",
+    "description": "Discover affordable housing developments across Kitui County. Interactive maps, detailed project information, and comprehensive statistics.",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "background_color": "#1a4d47",
+    "theme_color": "#1a4d47",
+    "icons": [
+        {
+            "src": "/static/favicon/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/static/favicon/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": ["housing", "real estate", "government"],
+    "lang": "en",
+    "dir": "ltr",
+    "prefer_related_applications": false
+}
