@@ -218,8 +218,29 @@
     <div class="alert alert-light border mb-5" style="border-color: #2d6f65 !important;">
         <i class="fas fa-info-circle" style="color: #1a4d47;"></i>
         <small class="ms-2" style="color: #5a7572;">
-            This project was developed in partnership with <strong><a href="https://spationex.com" target="_blank" rel="noopener noreferrer">SpatioNEX</a></strong>, a team dedicated to creating innovative solutions for regional development and community empowerment.
+            This project was developed in partnership with <strong><a href="https://www.spationex.com" target="_blank" rel="noopener noreferrer" id="spationex-link">SpatioNEX</a></strong>, a team dedicated to creating innovative solutions for regional development and community empowerment.
         </small>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Ensure SpatioNEX link opens correctly as external URL
+    document.addEventListener('DOMContentLoaded', function() {
+        const spationexLink = document.getElementById('spationex-link');
+        if (spationexLink) {
+            // Force absolute URL
+            spationexLink.href = 'https://www.spationex.com';
+            // Add click handler to ensure it opens correctly
+            spationexLink.addEventListener('click', function(e) {
+                // Double-check the URL is correct before navigation
+                if (!this.href.startsWith('http://') && !this.href.startsWith('https://')) {
+                    e.preventDefault();
+                    window.open('https://www.spationex.com', '_blank', 'noopener,noreferrer');
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}
