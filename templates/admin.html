@@ -987,7 +987,7 @@
                                                     {% endif %}
                                                 </td>
                                                 <td>
-                                                    {% if project.status == 'complete' %}
+                                                    {% if project.status == 'completed' or project.status == 'complete' %}
                                                         <span class="badge bg-success badge-status">Complete</span>
                                                     {% elif project.status == 'ongoing' %}
                                                         <span class="badge bg-warning text-dark badge-status">Ongoing</span>
@@ -1348,7 +1348,7 @@ const projects = {{ projects | tojson }};
 (function() {
     const totalUnits = projects.reduce((sum, p) => sum + (parseInt(p.units) || 0), 0);
     const ongoing = projects.filter(p => p.status === 'ongoing').length;
-    const completed = projects.filter(p => p.status === 'complete').length;
+    const completed = projects.filter(p => p.status === 'completed' || p.status === 'complete').length;
     
     const totalUnitsEl = document.getElementById('total-units-stat');
     const ongoingEl = document.getElementById('ongoing-stat');

@@ -21,7 +21,7 @@ function calculateStats() {
     });
     
     const ongoingCount = statusCounts['ongoing'] || 0;
-    const completedCount = statusCounts['complete'] || 0;
+    const completedCount = (statusCounts['completed'] || 0) + (statusCounts['complete'] || 0);
     
     // Update stats cards
     $('#total-projects').text(totalProjects);

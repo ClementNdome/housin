@@ -188,7 +188,7 @@ function addMarkersToMap(projectsData) {
     projectsData.forEach(function(project, index) {
         // Choose marker color based on status
         let markerColor = 'blue';
-        if (project.status === 'complete') markerColor = 'green';
+        if (project.status === 'completed' || project.status === 'complete') markerColor = 'green';
         else if (project.status === 'ongoing') markerColor = 'orange';
         else if (project.status === 'nearing completion') markerColor = 'yellow';
         else if (project.status === 'planned') markerColor = 'gray';
