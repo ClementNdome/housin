@@ -134,20 +134,30 @@ function loadSubcountiesLayer() {
                     if (feature.properties && feature.properties.name) {
                         const popupContent = `<div style="font-weight: 500; color: #1a4d47;">${feature.properties.name}</div>`;
                         
-                        // Show popup on mouseover
-                        layer.on('mouseover', function() {
-                            layer.setStyle({
-                                opacity: 0.7,
-                                weight: 2.5,
-                                fillOpacity: 0.25
-                            });
-                            layer.bindPopup(popupContent).openPopup();
+                        // Show popup on mouseover - but don't interfere with marker selection
+                        layer.on('mouseover', function(e) {
+                            // Only show enhanced style if no marker is currently selected
+                            const anyPopupOpen = markers.some(m => m.isPopupOpen());
+                            if (!anyPopupOpen) {
+                                layer.setStyle({
+                                    opacity: 0.6,
+                                    weight: 2,
+                                    fillOpacity: 0.2
+                                });
+                                layer.bindPopup(popupContent).openPopup();
+                            }
+                            // Prevent event from propagating to map
+                            L.DomEvent.stopPropagation(e);
                         });
                         
-                        // Restore style on mouseout
-                        layer.on('mouseout', function() {
-                            layer.setStyle(subcountiesStyle);
-                            layer.closePopup();
+                        // Restore style on mouseout - only if no marker popup is open
+                        layer.on('mouseout', function(e) {
+                            const anyPopupOpen = markers.some(m => m.isPopupOpen());
+                            if (!anyPopupOpen) {
+                                layer.setStyle(subcountiesStyle);
+                                layer.closePopup();
+                            }
+                            L.DomEvent.stopPropagation(e);
                         });
                     }
                 }
@@ -173,18 +183,18 @@ function addBasemapSelector() {
     
     basemapControl.onAdd = function(map) {
         const div = L.DomUtil.create('div', 'basemap-selector');
-        div.setAttribute('style', 'z-index: 1002 !important; position: relative;');
+        div.setAttribute('style', 'z-index: 1001 !important; position: relative; margin-top: 68px;');
         
-        const savedBasemap = localStorage.getItem('selectedBasemap') || 'OpenStreetMap';
+        const savedBasemap = localStorage.getItem('selectedBasemap') || 'Satellite';
         
         div.innerHTML = `
-            <div class="basemap-selector-container" style="z-index: 1002;">
-                <button class="basemap-toggle" type="button" title="Change Basemap" style="z-index: 1002; display: inline-block; background: white; color: #1a4d47; border: 1px solid #dee2e6; border-radius: 4px; padding: 6px 10px; font-size: 0.8rem; cursor: pointer; font-weight: 500; white-space: nowrap;">
-                    <i class="fas fa-layer-group" style="margin-right: 4px;"></i><span style="display: none; margin-left: 4px;">Basemap</span>
+            <div class="basemap-selector-container" style="z-index: 1001;">
+                <button class="basemap-toggle" type="button" title="Change Basemap" style="z-index: 1001; display: flex; align-items: center; justify-content: center; background: white; color: #1a4d47; border: 2px solid #dee2e6; border-radius: 4px; padding: 8px 10px; font-size: 1rem; cursor: pointer; font-weight: 600; white-space: nowrap; width: 40px; height: 40px; min-width: 40px;">
+                    <i class="fas fa-layer-group"></i>
                 </button>
-                <div class="basemap-menu" style="display: none; z-index: 1005; position: absolute; top: 100%; right: 0; background: white; border: 1px solid #dee2e6; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); min-width: 150px; margin-top: 4px;">
+                <div class="basemap-menu" style="display: none; z-index: 1005; position: absolute; top: 50px; right: 0; background: white; border: 1px solid #dee2e6; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); min-width: 160px;">
                     ${Object.keys(basemaps).map(name => `
-                        <button class="basemap-option ${name === savedBasemap ? 'active' : ''}" data-basemap="${name}" style="z-index: 1005; display: block; width: 100%; text-align: left; background: ${name === savedBasemap ? '#f0f0f0' : 'white'}; color: #495057; border: none; padding: 8px 12px; font-size: 0.85rem; cursor: pointer; border-bottom: 1px solid #f0f0f0;">
+                        <button class="basemap-option ${name === savedBasemap ? 'active' : ''}" data-basemap="${name}" style="z-index: 1005; display: block; width: 100%; text-align: left; background: ${name === savedBasemap ? '#f0f0f0' : 'white'}; color: #495057; border: none; padding: 10px 12px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
                             <i class="fas fa-map" style="margin-right: 6px;"></i>${name}
                         </button>
                     `).join('')}
@@ -279,7 +289,7 @@ function addMarkersToMap(projectsData) {
                 <small><strong>ID:</strong> ${project.boma_id}</small><br>
                 <small><strong>Units:</strong> ${project.units.toLocaleString()}</small>
                 ${project.price_start ? `<br><small><strong>From:</strong> KES ${project.price_start.toLocaleString()}</small>` : ''}
-                ${project.image ? `<div class="mt-2"><img src="${project.image}" alt="${project.name}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 4px;" onerror="this.style.display='none'"></div>` : ''}
+                ${project.image ? `<div class="mt-2"><img src="${project.image}" alt="${project.name}" loading="lazy" style="width: 100%; height: 120px; object-fit: cover; border-radius: 4px;" onerror="this.style.display='none'"></div>` : ''}
                 <div class="d-grid gap-2 mt-2">
                     <button class="btn btn-sm btn-primary" onclick="showProjectInSidebar(${index})"><i class="fas fa-info-circle me-1"></i>Details</button>
                     <button class="btn btn-sm btn-outline-secondary" onclick="toggleFavorite(${index})"><span id="fav-icon-${index}">${isProjectFavorite(index) ? '⭐' : '☆'}</span> Favorite</button>
@@ -309,7 +319,7 @@ function showProjectDetails(index) {
 
     const detailsHtml = `
         <div class="card border-0 shadow-sm">
-            ${project.image ? `<div style="height: 180px; overflow: hidden;"><img src="${project.image}" alt="${project.name}" style="width: 100%; height: 100%; object-fit: cover;"></div>` : `<div style="height: 120px; background: linear-gradient(135deg, #1a4d47, #2d6f65); display: flex; align-items: center; justify-content: center;"><i class="fas fa-building fa-3x" style="color: white; opacity: 0.7;"></i></div>`}
+            ${project.image ? `<div style="height: 180px; overflow: hidden;"><img src="${project.image}" alt="${project.name}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;"></div>` : `<div style="height: 120px; background: linear-gradient(135deg, #1a4d47, #2d6f65); display: flex; align-items: center; justify-content: center;"><i class="fas fa-building fa-3x" style="color: white; opacity: 0.7;"></i></div>`}
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <h5 class="card-title mb-0" style="color: #1a4d47;">${project.name}</h5>

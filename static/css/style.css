@@ -153,6 +153,38 @@ img {
 .leaflet-control-zoom {
     margin-top: 10px !important;
     z-index: 100 !important;
+    border: 2px solid #dee2e6 !important;
+    border-radius: 4px !important;
+    background-color: white !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+}
+
+.leaflet-control-zoom a {
+    width: 40px !important;
+    height: 40px !important;
+    line-height: 40px !important;
+    font-size: 1.2rem !important;
+    color: #1a4d47 !important;
+    background-color: white !important;
+    border: none !important;
+    text-decoration: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.leaflet-control-zoom a:hover {
+    background-color: #f0f0f0 !important;
+    color: #0f3330 !important;
+}
+
+.leaflet-control-zoom a:first-child {
+    border-bottom: 1px solid #dee2e6 !important;
+    border-radius: 3px 3px 0 0 !important;
+}
+
+.leaflet-control-zoom a:last-child {
+    border-radius: 0 0 3px 3px !important;
 }
 
 .leaflet-control-attribution {
