@@ -61,7 +61,8 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -136,11 +137,11 @@
                         &copy; <span id="current-year">2026</span> Kitui Housing Dashboard. All rights reserved.
                     </p>
                 </div>
-                <div class="col-md-6 text-md-end">
+                <!-- <div class="col-md-6 text-md-end">
                     <p class="mb-0 small" style="color: #5a7572;">
                         <a href="https://www.spationex.com" target="_blank"><i class="fas fa-code me-1"></i>Developed in partnership with SpatioNEX</a>
                     </p>
-                </div>
+                </div> -->
             </div>
         </div>
     </footer>
