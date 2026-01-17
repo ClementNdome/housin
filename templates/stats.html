@@ -19,40 +19,62 @@
         color: #5a7572;
         font-weight: 600;
     }
+    @media (max-width: 768px) {
+        .stat-number {
+            font-size: 1.75rem;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+        }
+        .card-body {
+            padding: 1rem;
+        }
+        h1.display-4 {
+            font-size: 2rem;
+        }
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .table {
+            font-size: 0.875rem;
+            min-width: 600px;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container my-5">
-    <h1 class="display-4 mb-5" style="color: #1a4d47;"><i class="fas fa-chart-pie me-3"></i>Housing Statistics</h1>
+<div class="container my-4 my-md-5">
+    <h1 class="display-4 mb-4 mb-md-5" style="color: #1a4d47;"><i class="fas fa-chart-pie me-2 me-md-3"></i><span class="d-none d-sm-inline">Housing </span>Statistics</h1>
     
     <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card stat-card text-center border-0 shadow-sm">
+        <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
+            <div class="card stat-card text-center border-0 shadow-sm h-100">
                 <div class="card-body">
                     <h5 class="stat-label">Total Projects</h5>
                     <h2 class="stat-number" id="total-projects">-</h2>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stat-card text-center border-0 shadow-sm">
+        <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
+            <div class="card stat-card text-center border-0 shadow-sm h-100">
                 <div class="card-body">
                     <h5 class="stat-label">Total Units</h5>
                     <h2 class="stat-number" id="total-units">-</h2>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stat-card text-center border-0 shadow-sm">
+        <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
+            <div class="card stat-card text-center border-0 shadow-sm h-100">
                 <div class="card-body">
                     <h5 class="stat-label">Ongoing Projects</h5>
                     <h2 class="stat-number" id="ongoing-count">-</h2>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stat-card text-center border-0 shadow-sm">
+        <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
+            <div class="card stat-card text-center border-0 shadow-sm h-100">
                 <div class="card-body">
                     <h5 class="stat-label">Completed Projects</h5>
                     <h2 class="stat-number" id="completed-count">-</h2>

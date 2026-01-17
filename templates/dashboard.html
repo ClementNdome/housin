@@ -2,12 +2,85 @@
 
 {% block title %}Dashboard - Kitui Housing{% endblock %}
 
+{% block extra_css %}
+<style>
+    .sidebar {
+        height: calc(100vh - 76px);
+        overflow-y: auto;
+    }
+    .sidebar-toggle {
+        display: none;
+        position: fixed;
+        top: 90px;
+        left: 10px;
+        z-index: 1050;
+        background-color: #1a4d47;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    @media (max-width: 991.98px) {
+        .sidebar {
+            position: fixed;
+            top: 76px;
+            left: -100%;
+            width: 300px;
+            height: calc(100vh - 76px);
+            z-index: 1040;
+            transition: left 0.3s ease;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+        }
+        .sidebar.show {
+            left: 0;
+        }
+        .sidebar-toggle {
+            display: block;
+        }
+        .map-container {
+            width: 100%;
+        }
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 76px;
+            left: 0;
+            width: 100%;
+            height: calc(100vh - 76px);
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1035;
+        }
+        .sidebar-overlay.show {
+            display: block;
+        }
+    }
+    @media (max-width: 575.98px) {
+        .sidebar {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid p-0">
+    <!-- Sidebar Toggle Button (Mobile Only) -->
+    <button class="sidebar-toggle" id="sidebarToggle" type="button">
+        <i class="fas fa-bars me-2"></i>Menu
+    </button>
+    
+    <!-- Sidebar Overlay (Mobile Only) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
     <div class="row g-0">
         <!-- Sidebar -->
-        <div class="col-lg-3 col-md-4 sidebar bg-light p-3" style="height: calc(100vh - 76px); overflow-y: auto;">
-            <h4 class="mb-4"><i class="fas fa-search me-2" style="color: #1a4d47;"></i>Search Projects</h4>
+        <div class="col-lg-3 col-md-4 sidebar bg-light p-3" id="sidebar">
+            <div class="d-flex justify-content-between align-items-center mb-3 d-md-none">
+                <h4 class="mb-0"><i class="fas fa-search me-2" style="color: #1a4d47;"></i>Search Projects</h4>
+                <button class="btn btn-sm btn-close" id="closeSidebar" type="button" aria-label="Close"></button>
+            </div>
+            <h4 class="mb-4 d-none d-md-block"><i class="fas fa-search me-2" style="color: #1a4d47;"></i>Search Projects</h4>
             
             <!-- Search Form -->
             <form id="search-form" class="mb-4">
@@ -20,20 +93,23 @@
                            aria-label="Search projects"
                            list="projects-list">
                     <datalist id="projects-list"></datalist>
-                    <button type="submit" class="btn" style="background-color: #1a4d47; color: white;">Search</button>
+                    <button type="submit" class="btn" style="background-color: #1a4d47; color: white;">
+                        <i class="fas fa-search d-md-none"></i>
+                        <span class="d-none d-md-inline">Search</span>
+                    </button>
                 </div>
             </form>
 
             <!-- Project Details Panel -->
             <div id="project-details" class="mt-4">
                 <div class="text-center text-muted">
-                    <p>Select a project from the map or search to view details</p>
+                    <p class="small">Select a project from the map or search to view details</p>
                 </div>
             </div>
 
             <!-- Favorites Section -->
             <div class="mt-4">
-                <h5><i class="fas fa-heart me-2" style="color: #1a4d47;"></i>Favorites</h5>
+                <h5 class="h6"><i class="fas fa-heart me-2" style="color: #1a4d47;"></i>Favorites</h5>
                 <div id="favorites-list" class="list-group">
                     <!-- Favorites will be populated here -->
                 </div>
@@ -41,7 +117,7 @@
         </div>
 
         <!-- Map Container -->
-        <div class="col-lg-9 col-md-8 position-relative">
+        <div class="col-lg-9 col-md-8 position-relative map-container">
             <div id="map-loading" class="text-center p-5" style="height: calc(100vh - 76px); display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
                 <div>
                     <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
@@ -55,6 +131,51 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Sidebar toggle functionality for mobile
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const closeSidebar = document.getElementById('closeSidebar');
+        
+        function openSidebar() {
+            sidebar.classList.add('show');
+            sidebarOverlay.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeSidebarFunc() {
+            sidebar.classList.remove('show');
+            sidebarOverlay.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', openSidebar);
+        }
+        
+        if (closeSidebar) {
+            closeSidebar.addEventListener('click', closeSidebarFunc);
+        }
+        
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', closeSidebarFunc);
+        }
+        
+        // Close sidebar when clicking outside on mobile
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 991.98) {
+                closeSidebarFunc();
+            }
+        });
+    });
+</script>
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+<script src="{{ url_for('static', filename='js/search.js') }}"></script>
 {% endblock %}
 
 {% block extra_js %}
