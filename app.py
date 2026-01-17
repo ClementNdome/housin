@@ -2023,4 +2023,4 @@ if __name__ == '__main__':
         logger.error('  gunicorn -w 4 -b 0.0.0.0:5000 app:app')
         raise RuntimeError('Use production WSGI server')
     
-    app.run(debug=debug_mode, host='127.0.0.1', port=5000)
+    app.run(debug=debug_mode, host='127.0.0.1')
