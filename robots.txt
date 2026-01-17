@@ -1,0 +1,45 @@
+# Robots.txt for AHP Housing Program - https://ahp.spationex.com
+
+# Allow all legitimate bots to crawl public content
+User-agent: *
+Allow: /
+Allow: /about
+Allow: /dashboard
+Allow: /stats
+Allow: /contact
+Allow: /signup
+Allow: /login
+Allow: /api/projects
+
+# Disallow crawling of private/admin areas
+Disallow: /admin
+Disallow: /uploads
+Disallow: /change-password
+Disallow: /logout
+Disallow: /reset-password
+Disallow: /forgot-password
+Disallow: /*?*
+Disallow: /__pycache__/
+
+# Specific rules for common bots
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# Block bad bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+# Sitemap location
+Sitemap: https://ahp.spationex.com/sitemap.xml
+
+# Crawl delay for all bots (optional - in seconds)
+Crawl-delay: 1
