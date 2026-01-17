@@ -1850,6 +1850,39 @@ def get_projects():
         logger.error(f'Error in get_projects API: {e}')
         return jsonify({'error': 'Failed to load projects'}), 500
 
+@app.route('/favicon.ico')
+def favicon():
+    """Serve favicon"""
+    return redirect(url_for('static', filename='favicon/favicon.ico'))
+
+@app.route('/manifest.json')
+def manifest():
+    """Serve web manifest with proper content type"""
+    try:
+        manifest_path = Path(__file__).parent / 'static' / 'favicon' / 'site.webmanifest'
+        with open(manifest_path, 'r', encoding='utf-8') as f:
+            manifest_data = json.load(f)
+        response = jsonify(manifest_data)
+        response.headers['Content-Type'] = 'application/manifest+json'
+        return response
+    except Exception as e:
+        logger.error(f'Error serving manifest: {e}')
+        return jsonify({'error': 'Manifest not found'}), 404
+
+@app.route('/service-worker.js')
+def service_worker():
+    """Serve service worker with proper content type"""
+    try:
+        sw_path = Path(__file__).parent / 'static' / 'js' / 'service-worker.js'
+        with open(sw_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        response = Response(content, mimetype='application/javascript')
+        response.headers['Service-Worker-Allowed'] = '/'
+        return response
+    except Exception as e:
+        logger.error(f'Error serving service worker: {e}')
+        return 'Service worker not found', 404
+
 @app.route('/uploads/<filename>')
 def serve_image(filename):
     """Serve images from the image database"""
