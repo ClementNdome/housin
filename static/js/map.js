@@ -80,12 +80,87 @@ function switchBasemap(basemapName) {
     }
 }
 
+<<<<<<< Updated upstream
+=======
+/**
+ * Load and display Kitui subcounties GeoJSON layer
+ * Shows faint polygon boundaries for subcounty visualization
+ */
+function loadSubcountiesLayer() {
+    $.ajax({
+        url: '/static/data/kitui_subcounties.geojson',
+        dataType: 'json',
+        success: function(geojsonData) {
+            // Define styling for subcounties polygons
+            const subcountiesStyle = {
+                color: '#1a4d47',           // Primary color
+                weight: 1.5,                 // Thin lines
+                opacity: 0.4,                // Faint (40% opacity)
+                fillColor: '#e8eff0',       // Light neutral fill
+                fillOpacity: 0.15,           // Very faint fill (15% opacity)
+                dashArray: '5, 3'           // Dashed lines for subtle effect
+            };
+
+            // Create GeoJSON layer
+            const subcountiesLayer = L.geoJSON(geojsonData, {
+                style: subcountiesStyle,
+                onEachFeature: function(feature, layer) {
+                    // Add popup with subcounty name on hover
+                    if (feature.properties && feature.properties.name) {
+                        const popupContent = `<div style="font-weight: 500; color: #1a4d47;">${feature.properties.name}</div>`;
+                        
+                        // Show popup on mouseover - but don't interfere with marker selection
+                        layer.on('mouseover', function(e) {
+                            // Only show enhanced style if no marker is currently selected
+                            const anyPopupOpen = markers.some(m => m.isPopupOpen());
+                            if (!anyPopupOpen) {
+                                layer.setStyle({
+                                    opacity: 0.6,
+                                    weight: 2,
+                                    fillOpacity: 0.2
+                                });
+                                layer.bindPopup(popupContent).openPopup();
+                            }
+                            // Prevent event from propagating to map
+                            L.DomEvent.stopPropagation(e);
+                        });
+                        
+                        // Restore style on mouseout - only if no marker popup is open
+                        layer.on('mouseout', function(e) {
+                            const anyPopupOpen = markers.some(m => m.isPopupOpen());
+                            if (!anyPopupOpen) {
+                                layer.setStyle(subcountiesStyle);
+                                layer.closePopup();
+                            }
+                            L.DomEvent.stopPropagation(e);
+                        });
+                    }
+                }
+            });
+
+            // Add to map (will appear between basemap and markers)
+            subcountiesLayer.addTo(map);
+            
+            // Store reference for layer management if needed
+            window.subcountiesLayer = subcountiesLayer;
+        },
+        error: function() {
+            console.error('Failed to load subcounties GeoJSON layer');
+        }
+    });
+}
+
+/**
+ * Add basemap selector control
+ */
+>>>>>>> Stashed changes
 function addBasemapSelector() {
     // Create basemap selector control
     const basemapControl = L.control({ position: 'topright' });
     
     basemapControl.onAdd = function(map) {
         const div = L.DomUtil.create('div', 'basemap-selector');
+<<<<<<< Updated upstream
         const savedBasemap = localStorage.getItem('selectedBasemap') || 'OpenStreetMap';
         
         div.innerHTML = `
@@ -98,6 +173,21 @@ function addBasemapSelector() {
                         <button class="basemap-option ${name === savedBasemap ? 'active' : ''}" 
                                 data-basemap="${name}">
                             ${name}
+=======
+        div.setAttribute('style', 'z-index: 1001 !important; position: relative; margin-top: 68px;');
+        
+        const savedBasemap = localStorage.getItem('selectedBasemap') || 'Satellite';
+        
+        div.innerHTML = `
+            <div class="basemap-selector-container" style="z-index: 1001;">
+                <button class="basemap-toggle" type="button" title="Change Basemap" style="z-index: 1001; display: flex; align-items: center; justify-content: center; background: white; color: #1a4d47; border: 2px solid #dee2e6; border-radius: 4px; padding: 8px 10px; font-size: 1rem; cursor: pointer; font-weight: 600; white-space: nowrap; width: 40px; height: 40px; min-width: 40px;">
+                    <i class="fas fa-layer-group"></i>
+                </button>
+                <div class="basemap-menu" style="display: none; z-index: 1005; position: absolute; top: 50px; right: 0; background: white; border: 1px solid #dee2e6; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); min-width: 160px;">
+                    ${Object.keys(basemaps).map(name => `
+                        <button class="basemap-option ${name === savedBasemap ? 'active' : ''}" data-basemap="${name}" style="z-index: 1005; display: block; width: 100%; text-align: left; background: ${name === savedBasemap ? '#f0f0f0' : 'white'}; color: #495057; border: none; padding: 10px 12px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
+                            <i class="fas fa-map" style="margin-right: 6px;"></i>${name}
+>>>>>>> Stashed changes
                         </button>
                     `).join('')}
                 </div>
@@ -207,6 +297,7 @@ function addMarkersToMap(projectsData) {
         // Create popup content
         const popupContent = `
             <div class="popup-content">
+<<<<<<< Updated upstream
                 <h5 class="mb-2">${project.name}</h5>
                 <p class="mb-1"><strong>Status:</strong> <span class="badge bg-secondary">${project.status}</span></p>
                 <p class="mb-1"><strong>Units:</strong> ${project.units.toLocaleString()}</p>
@@ -217,6 +308,20 @@ function addMarkersToMap(projectsData) {
                 <button class="btn btn-sm btn-outline-secondary mt-2" onclick="toggleFavorite(${index})">
                     <span id="fav-icon-${index}">⭐</span> Favorite
                 </button>
+=======
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h6 class="mb-0" style="color: #1a4d47;">${project.name}</h6>
+                    <span class="badge" style="background-color: ${markerColor}; color: white;">${project.status}</span>
+                </div>
+                <small><strong>ID:</strong> ${project.boma_id}</small><br>
+                <small><strong>Units:</strong> ${project.units.toLocaleString()}</small>
+                ${project.price_start ? `<br><small><strong>From:</strong> KES ${project.price_start.toLocaleString()}</small>` : ''}
+                ${project.image ? `<div class="mt-2"><img src="${project.image}" alt="${project.name}" loading="lazy" style="width: 100%; height: 120px; object-fit: cover; border-radius: 4px;" onerror="this.style.display='none'"></div>` : ''}
+                <div class="d-grid gap-2 mt-2">
+                    <button class="btn btn-sm btn-primary" onclick="showProjectInSidebar(${index})"><i class="fas fa-info-circle me-1"></i>Details</button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="toggleFavorite(${index})"><span id="fav-icon-${index}">${isProjectFavorite(index) ? '⭐' : '☆'}</span> Favorite</button>
+                </div>
+>>>>>>> Stashed changes
             </div>
         `;
         
@@ -241,7 +346,12 @@ function showProjectDetails(index) {
     if (!project) return;
 
     const detailsHtml = `
+<<<<<<< Updated upstream
         <div class="card">
+=======
+        <div class="card border-0 shadow-sm">
+            ${project.image ? `<div style="height: 180px; overflow: hidden;"><img src="${project.image}" alt="${project.name}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;"></div>` : `<div style="height: 120px; background: linear-gradient(135deg, #1a4d47, #2d6f65); display: flex; align-items: center; justify-content: center;"><i class="fas fa-building fa-3x" style="color: white; opacity: 0.7;"></i></div>`}
+>>>>>>> Stashed changes
             <div class="card-body">
                 ${project.image ? `<img src="${project.image}" alt="${project.name}" class="img-fluid mb-3" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 4px;" onerror="this.style.display='none'">` : ''}
                 <h4 class="card-title">${project.name}</h4>

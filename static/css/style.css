@@ -403,8 +403,149 @@ main {
     padding: 0.35em 0.65em;
 }
 
+<<<<<<< Updated upstream
 /* Table enhancements */
 .table-responsive {
+=======
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.floating-menu-btn.pulse {
+    animation: pulse 2s infinite;
+}
+
+#admin-content {
+    animation: fadeIn 0.5s;
+}
+
+/* ===== MAP STYLES ===== */
+#map {
+    z-index: 1;
+    width: 100% !important;
+    height: 100% !important;
+    position: relative;
+}
+
+/* ===== LEAFLET CONTROLS ===== */
+.leaflet-control-zoom {
+    margin-top: 10px !important;
+    z-index: 100 !important;
+    border: 2px solid #dee2e6 !important;
+    border-radius: 4px !important;
+    background-color: white !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+}
+
+.leaflet-control-zoom a {
+    width: 40px !important;
+    height: 40px !important;
+    line-height: 40px !important;
+    font-size: 1.2rem !important;
+    color: #1a4d47 !important;
+    background-color: white !important;
+    border: none !important;
+    text-decoration: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.leaflet-control-zoom a:hover {
+    background-color: #f0f0f0 !important;
+    color: #0f3330 !important;
+}
+
+.leaflet-control-zoom a:first-child {
+    border-bottom: 1px solid #dee2e6 !important;
+    border-radius: 3px 3px 0 0 !important;
+}
+
+.leaflet-control-zoom a:last-child {
+    border-radius: 0 0 3px 3px !important;
+}
+
+.leaflet-control-attribution {
+    font-size: 11px !important;
+    z-index: 100 !important;
+}
+
+.leaflet-control {
+    z-index: 100 !important;
+}
+
+.leaflet-top, .leaflet-bottom {
+    z-index: 100 !important;
+}
+
+.leaflet-control-container {
+    z-index: 1002 !important;
+}
+
+.leaflet-top.leaflet-right {
+    z-index: 1002 !important;
+    right: 10px !important;
+    top: 10px !important;
+}
+
+/* ===== BASEMAP SELECTOR FIX ===== */
+.basemap-selector {
+    z-index: 1002 !important;
+    position: relative;
+}
+
+.basemap-selector-container {
+    position: relative;
+    z-index: 1002 !important;
+}
+
+.basemap-toggle {
+    z-index: 1002 !important;
+    transition: all 0.2s;
+}
+
+.basemap-toggle:hover {
+    background: #f0f0f0 !important;
+    border-color: #1a4d47 !important;
+}
+
+.basemap-menu {
+    z-index: 1005 !important;
+}
+
+.basemap-option {
+    z-index: 1005 !important;
+    transition: all 0.2s;
+}
+
+.basemap-option:hover {
+    background: #f8f9fa !important;
+    color: #1a4d47 !important;
+}
+
+.basemap-option.active {
+    background: #e8eff0 !important;
+    color: #1a4d47 !important;
+    font-weight: 500;
+}
+
+/* ===== SEARCH SUGGESTIONS ===== */
+.search-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: white;
+    border: 1px solid #dee2e6;
+>>>>>>> Stashed changes
     border-radius: 8px;
     overflow: hidden;
 }

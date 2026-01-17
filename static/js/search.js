@@ -1,7 +1,9 @@
 // Search and autocomplete functionality
 let allProjects = [];
+let searchDebounceTimer;
 
 $(document).ready(function() {
+<<<<<<< Updated upstream
     // Load projects for autocomplete
     $.get('/api/projects', function(data) {
         allProjects = data;
@@ -12,6 +14,32 @@ $(document).ready(function() {
     $('#search-form').on('submit', function(e) {
         e.preventDefault();
         performSearch();
+=======
+    // Load projects for autocomplete with error handling
+    $.get('/api/projects')
+        .done(function(data) {
+            allProjects = data;
+        })
+        .fail(function() {
+            console.error('Failed to load projects for search');
+        });
+
+    // Real-time search suggestions with debouncing for performance
+    $('#search-input, #mobile-search-input').on('input', function(e) {
+        const query = $(this).val().toLowerCase();
+        
+        // Clear previous timer
+        clearTimeout(searchDebounceTimer);
+        
+        // Debounce search to avoid excessive function calls
+        if (query.length > 1) {
+            searchDebounceTimer = setTimeout(function() {
+                showSearchSuggestions(query, e.target.id);
+            }, 300); // Wait 300ms after user stops typing
+        } else {
+            hideSearchSuggestions();
+        }
+>>>>>>> Stashed changes
     });
 });
 
