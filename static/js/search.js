@@ -5,75 +5,113 @@ $(document).ready(function() {
     // Load projects for autocomplete
     $.get('/api/projects', function(data) {
         allProjects = data;
-        setupAutocomplete();
     });
 
-    // Search form submission
-    $('#search-form').on('submit', function(e) {
-        e.preventDefault();
-        performSearch();
+    // Real-time search suggestions
+    $('#search-input, #mobile-search-input').on('input', function(e) {
+        const query = $(this).val().toLowerCase();
+        query.length > 1 ? showSearchSuggestions(query, e.target.id) : hideSearchSuggestions();
     });
 });
 
-function setupAutocomplete() {
-    const datalist = $('#projects-list');
-    datalist.empty();
+/**
+ * Display search suggestions dropdown
+ */
+function showSearchSuggestions(query, inputId) {
+    $('#search-suggestions').remove();
     
-    allProjects.forEach(project => {
-        datalist.append(`<option value="${project.name}">${project.name} - ${project.status}</option>`);
-    });
+    const suggestions = allProjects
+        .filter(p => p.name.toLowerCase().includes(query) || p.boma_id.toLowerCase().includes(query))
+        .slice(0, 5);
+    
+    if (!suggestions.length) return;
+    
+    const isMobile = inputId === 'mobile-search-input';
+    const html = `
+        <div id="search-suggestions" class="search-suggestions ${isMobile ? 'mobile-suggestions' : ''}">
+            <div class="list-group">
+                ${suggestions.map(project => `
+                    <a href="#" class="list-group-item list-group-item-action" 
+                       onclick="selectSuggestion(${allProjects.indexOf(project)}, '${inputId}'); return false;">
+                        <div>
+                            <strong>${project.name}</strong>
+                            <span class="badge float-end" style="background-color: ${getStatusColor(project.status)}">${project.status}</span>
+                        </div>
+                        <small class="text-muted">ID: ${project.boma_id} • ${project.units} units</small>
+                    </a>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    
+    $(`#${inputId}`).closest('form').append(html);
 }
 
-function performSearch() {
-    const query = $('#search-input').val().trim().toLowerCase();
+/**
+ * Hide search suggestions
+ */
+function hideSearchSuggestions() {
+    $('#search-suggestions').fadeOut(200, function() { $(this).remove(); });
+}
+
+/**
+ * Handle suggestion selection
+ */
+function selectSuggestion(index, inputId) {
+    const project = allProjects[index];
+    $(`#${inputId}`).val(project.name);
+    hideSearchSuggestions();
     
-    if (!query) {
-        alert('Please enter a project name to search.');
-        return;
+    if (typeof showProjectInSidebar === 'function') {
+        showProjectInSidebar(index);
+    }
+    if (typeof focusOnProject === 'function') {
+        focusOnProject(index);
+    }
+}
+
+/**
+ * Global search function
+ */
+window.performSearch = function(query, source = 'desktop') {
+    const inputId = source === 'mobile' ? 'mobile-search-input' : 'search-input';
+    let searchQuery = typeof query === 'string' ? query.trim().toLowerCase() : '';
+    
+    if (!searchQuery) {
+        const input = $(`#${inputId}`);
+        searchQuery = input.val().trim().toLowerCase();
+        if (!searchQuery) {
+            showToast('Please enter a project name to search.', 'error');
+            return;
+        }
     }
 
-    // Find matching project
     const project = allProjects.find(p => 
-        p.name.toLowerCase().includes(query) ||
-        p.boma_id.toLowerCase().includes(query)
+        p.name.toLowerCase().includes(searchQuery) ||
+        p.boma_id.toLowerCase().includes(searchQuery)
     );
 
     if (project) {
         const index = allProjects.indexOf(project);
-        
-        // Pan and zoom to project
-        map.setView([project.lat, project.lon], 15);
-        
-        // Open popup on marker
-        const marker = markers.find(m => m.projectIndex === index);
-        if (marker) {
-            marker.openPopup();
-        }
-        
-        // Show details in sidebar
-        if (typeof showProjectDetails === 'function') {
-            showProjectDetails(index);
-        }
-        
-        // Highlight search input
-        $('#search-input').addClass('is-valid');
-        setTimeout(() => $('#search-input').removeClass('is-valid'), 2000);
+        if (typeof showProjectInSidebar === 'function') showProjectInSidebar(index);
+        if (typeof focusOnProject === 'function') focusOnProject(index);
+        hideSearchSuggestions();
+        showToast(`Found: ${project.name}`, 'success');
     } else {
-        alert('Project not found. Please try another search term.');
-        $('#search-input').addClass('is-invalid');
-        setTimeout(() => $('#search-input').removeClass('is-invalid'), 2000);
+        showToast('Project not found. Try another search term.', 'error');
     }
-}
+};
 
-// Real-time search suggestions (optional enhancement)
-$('#search-input').on('input', function() {
-    const query = $(this).val().toLowerCase();
-    if (query.length > 0) {
-        // Filter and show suggestions
-        const suggestions = allProjects.filter(p => 
-            p.name.toLowerCase().includes(query)
-        ).slice(0, 5);
-        
-        // Could implement a dropdown here if needed
-    }
-});
+/**
+ * Get color based on project status
+ */
+function getStatusColor(status) {
+    const statusColors = {
+        'completed': '#198754',
+        'complete': '#198754',
+        'ongoing': '#ffc107',
+        'nearing completion': '#fd7e14',
+        'planned': '#6c757d'
+    };
+    return statusColors[status.toLowerCase()] || '#2b5f8e';
+}
