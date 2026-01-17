@@ -4,6 +4,7 @@ let searchDebounceTimer;
 
 $(document).ready(function() {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     // Load projects for autocomplete
     $.get('/api/projects', function(data) {
         allProjects = data;
@@ -24,6 +25,17 @@ $(document).ready(function() {
             console.error('Failed to load projects for search');
         });
 
+=======
+    // Load projects for autocomplete with error handling
+    $.get('/api/projects')
+        .done(function(data) {
+            allProjects = data;
+        })
+        .fail(function() {
+            console.error('Failed to load projects for search');
+        });
+
+>>>>>>> Stashed changes
     // Real-time search suggestions with debouncing for performance
     $('#search-input, #mobile-search-input').on('input', function(e) {
         const query = $(this).val().toLowerCase();
@@ -39,6 +51,9 @@ $(document).ready(function() {
         } else {
             hideSearchSuggestions();
         }
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
     });
 });

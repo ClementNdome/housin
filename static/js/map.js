@@ -161,6 +161,7 @@ function addBasemapSelector() {
     basemapControl.onAdd = function(map) {
         const div = L.DomUtil.create('div', 'basemap-selector');
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         const savedBasemap = localStorage.getItem('selectedBasemap') || 'OpenStreetMap';
         
         div.innerHTML = `
@@ -185,6 +186,19 @@ function addBasemapSelector() {
                 </button>
                 <div class="basemap-menu" style="display: none; z-index: 1005; position: absolute; top: 50px; right: 0; background: white; border: 1px solid #dee2e6; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); min-width: 160px;">
                     ${Object.keys(basemaps).map(name => `
+=======
+        div.setAttribute('style', 'z-index: 1001 !important; position: relative; margin-top: 68px;');
+        
+        const savedBasemap = localStorage.getItem('selectedBasemap') || 'Satellite';
+        
+        div.innerHTML = `
+            <div class="basemap-selector-container" style="z-index: 1001;">
+                <button class="basemap-toggle" type="button" title="Change Basemap" style="z-index: 1001; display: flex; align-items: center; justify-content: center; background: white; color: #1a4d47; border: 2px solid #dee2e6; border-radius: 4px; padding: 8px 10px; font-size: 1rem; cursor: pointer; font-weight: 600; white-space: nowrap; width: 40px; height: 40px; min-width: 40px;">
+                    <i class="fas fa-layer-group"></i>
+                </button>
+                <div class="basemap-menu" style="display: none; z-index: 1005; position: absolute; top: 50px; right: 0; background: white; border: 1px solid #dee2e6; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); min-width: 160px;">
+                    ${Object.keys(basemaps).map(name => `
+>>>>>>> Stashed changes
                         <button class="basemap-option ${name === savedBasemap ? 'active' : ''}" data-basemap="${name}" style="z-index: 1005; display: block; width: 100%; text-align: left; background: ${name === savedBasemap ? '#f0f0f0' : 'white'}; color: #495057; border: none; padding: 10px 12px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
                             <i class="fas fa-map" style="margin-right: 6px;"></i>${name}
 >>>>>>> Stashed changes
@@ -351,6 +365,9 @@ function showProjectDetails(index) {
 =======
         <div class="card border-0 shadow-sm">
             ${project.image ? `<div style="height: 180px; overflow: hidden;"><img src="${project.image}" alt="${project.name}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;"></div>` : `<div style="height: 120px; background: linear-gradient(135deg, #1a4d47, #2d6f65); display: flex; align-items: center; justify-content: center;"><i class="fas fa-building fa-3x" style="color: white; opacity: 0.7;"></i></div>`}
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
             <div class="card-body">
                 ${project.image ? `<img src="${project.image}" alt="${project.name}" class="img-fluid mb-3" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 4px;" onerror="this.style.display='none'">` : ''}
