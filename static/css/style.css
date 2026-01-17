@@ -200,6 +200,159 @@ main {
     .container-fluid {
         padding: 0;
     }
+    
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+    
+    .navbar-nav {
+        text-align: center;
+    }
+    
+    .hero-section {
+        padding: 60px 0;
+    }
+    
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    
+    .hero-section .lead {
+        font-size: 1rem;
+    }
+    
+    .feature-card {
+        margin-bottom: 1.5rem;
+    }
+    
+    .stats-box h3 {
+        font-size: 2rem;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+}
+
+/* Extra small devices (phones, 576px and down) */
+@media (max-width: 576px) {
+    .hero-section {
+        padding: 40px 0;
+    }
+    
+    .hero-section h1 {
+        font-size: 1.75rem;
+    }
+    
+    .hero-section .lead {
+        font-size: 0.95rem;
+    }
+    
+    .stats-box h3 {
+        font-size: 1.75rem;
+    }
+    
+    .feature-icon {
+        font-size: 2rem;
+    }
+    
+    .navbar-brand {
+        font-size: 1rem;
+    }
+    
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .btn {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    footer {
+        padding: 1.5rem 0;
+    }
+    
+    footer .container {
+        text-align: center;
+    }
+    
+    footer .col-md-6 {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Tablet adjustments (768px to 992px) */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .hero-section {
+        padding: 80px 0;
+    }
+    
+    .hero-section h1 {
+        font-size: 2.5rem;
+    }
+    
+    #map {
+        height: 500px !important;
+    }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+    .container {
+        max-width: 1140px;
+    }
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1320px;
+    }
+}
+
+/* Landscape orientation on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .hero-section {
+        padding: 40px 0;
+    }
+    
+    #map {
+        height: 350px !important;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .btn, .card, .list-group-item {
+        min-height: 44px; /* Minimum touch target size */
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 0.75rem 1rem;
+    }
+    
+    input, select, textarea {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    img {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
 }
 
 /* Loading spinner */
