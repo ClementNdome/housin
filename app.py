@@ -1850,6 +1850,32 @@ def get_projects():
         logger.error(f'Error in get_projects API: {e}')
         return jsonify({'error': 'Failed to load projects'}), 500
 
+@app.route('/robots.txt')
+def robots():
+    """Serve robots.txt file"""
+    try:
+        robots_path = Path(__file__).parent / 'robots.txt'
+        with open(robots_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        response = Response(content, mimetype='text/plain')
+        return response
+    except Exception as e:
+        logger.error(f'Error serving robots.txt: {e}')
+        return 'robots.txt not found', 404
+
+@app.route('/sitemap.xml')
+def sitemap():
+    """Serve sitemap.xml file"""
+    try:
+        sitemap_path = Path(__file__).parent / 'sitemap.xml'
+        with open(sitemap_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        response = Response(content, mimetype='application/xml')
+        return response
+    except Exception as e:
+        logger.error(f'Error serving sitemap.xml: {e}')
+        return 'sitemap.xml not found', 404
+
 @app.route('/favicon.ico')
 def favicon():
     """Serve favicon"""
