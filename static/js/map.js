@@ -121,8 +121,7 @@ function loadSubcountiesLayer() {
                 color: '#2c3e50',           // Dark blue-grey
                 weight: 4,                   // Thick lines
                 opacity: 0.9,                 // Almost solid
-                fillColor: '#3498db',        // Light blue fill
-                fillOpacity: 0.25,             // Moderate fill
+                           // Moderate fill
                 // No dashArray
             };
 
@@ -154,8 +153,8 @@ function loadSubcountiesLayer() {
                                 color: '#e74c3c',
                                 weight: 6,
                                 opacity: 1,
-                                fillColor: '#f39c12',
-                                fillOpacity: 0.4
+                                
+                                
                             });
                             
                             if (!anyPopupOpen) {
