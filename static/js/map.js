@@ -116,58 +116,70 @@ function loadSubcountiesLayer() {
         url: '/static/data/kitui_subcounties.geojson',
         dataType: 'json',
         success: function(geojsonData) {
-            // Define styling for subcounties polygons
+            // Define styling for subcounties polygons - BOLD VISIBILITY
             const subcountiesStyle = {
-                color: '#1a4d47',           // Primary color
-                weight: 1.5,                 // Thin lines
-                opacity: 0.4,                // Faint (40% opacity)
-                fillColor: '#e8eff0',       // Light neutral fill
-                fillOpacity: 0.15,           // Very faint fill (15% opacity)
-                dashArray: '5, 3'           // Dashed lines for subtle effect
+                color: '#2c3e50',           // Dark blue-grey
+                weight: 4,                   // Thick lines
+                opacity: 0.9,                 // Almost solid
+                fillColor: '#3498db',        // Light blue fill
+                fillOpacity: 0.25,             // Moderate fill
+                // No dashArray
             };
 
             // Create GeoJSON layer
             const subcountiesLayer = L.geoJSON(geojsonData, {
                 style: subcountiesStyle,
                 onEachFeature: function(feature, layer) {
-                    // Add popup with subcounty name on hover
                     if (feature.properties && feature.properties.name) {
-                        const popupContent = `<div style="font-weight: 500; color: #1a4d47;">${feature.properties.name}</div>`;
+                        // Enhanced popup with better styling
+                        const popupContent = `
+                            <div style="
+                                font-weight: 600; 
+                                color: #2c3e50;
+                                padding: 8px 12px;
+                                background: #f8f9fa;
+                                border-left: 4px solid #3498db;
+                                border-radius: 4px;
+                                min-width: 150px;
+                            ">
+                                <strong>Subcounty:</strong> ${feature.properties.name}
+                            </div>
+                        `;
                         
-                        // Show popup on mouseover - but don't interfere with marker selection
                         layer.on('mouseover', function(e) {
-                            // Only show enhanced style if no marker is currently selected
-                            const anyPopupOpen = markers.some(m => m.isPopupOpen());
+                            const anyPopupOpen = markers.some(m => m.isPopupOpen && m.isPopupOpen());
+                            
+                            // Dramatic hover effect
+                            layer.setStyle({
+                                color: '#e74c3c',
+                                weight: 6,
+                                opacity: 1,
+                                fillColor: '#f39c12',
+                                fillOpacity: 0.4
+                            });
+                            
                             if (!anyPopupOpen) {
-                                layer.setStyle({
-                                    opacity: 0.6,
-                                    weight: 2,
-                                    fillOpacity: 0.2
-                                });
                                 layer.bindPopup(popupContent).openPopup();
                             }
-                            // Prevent event from propagating to map
+                            
+                            layer.bringToFront();
                             L.DomEvent.stopPropagation(e);
                         });
                         
-                        // Restore style on mouseout - only if no marker popup is open
                         layer.on('mouseout', function(e) {
-                            const anyPopupOpen = markers.some(m => m.isPopupOpen());
-                            if (!anyPopupOpen) {
-                                layer.setStyle(subcountiesStyle);
-                                layer.closePopup();
-                            }
+                            layer.setStyle(subcountiesStyle);
+                            layer.closePopup();
                             L.DomEvent.stopPropagation(e);
                         });
                     }
                 }
             });
 
-            // Add to map (will appear between basemap and markers)
             subcountiesLayer.addTo(map);
-            
-            // Store reference for layer management if needed
             window.subcountiesLayer = subcountiesLayer;
+            
+            // Optional: Fit bounds to show all subcounties
+            // map.fitBounds(subcountiesLayer.getBounds());
         },
         error: function() {
             console.error('Failed to load subcounties GeoJSON layer');
