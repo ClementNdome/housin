@@ -1,225 +1,230 @@
-# Kitui Housing Dashboard
+# Kitui Housing Program - Next.js Frontend
 
-A comprehensive web application for visualizing affordable housing projects in Kitui County, Kenya. This interactive dashboard allows users to explore housing projects on a map, search for specific developments, view detailed statistics, and access project information.
+A modern, responsive Next.js 15 frontend for the Kitui Housing Program. This application provides an interactive map-based interface for exploring housing projects across Kitui County.
 
 ## Features
 
-- 🗺️ **Interactive Map**: Explore housing projects on an interactive map powered by Leaflet.js and OpenStreetMap
-- 🔍 **Smart Search**: Find projects quickly with autocomplete search functionality
-- 📊 **Statistics Dashboard**: View aggregated data and visualizations of housing projects
-- 📝 **Detailed Information**: Access comprehensive project details including status, units, pricing, and amenities
-- ⭐ **Favorites**: Save your preferred projects for quick access (stored in browser localStorage)
-- 📱 **Responsive Design**: Access the dashboard on any device with a mobile-first approach
-- 🔐 **Admin Panel**: Manage projects with a simple CRUD interface (password-protected)
+- **Interactive Map**: Leaflet-based map with 6 basemap options (OpenStreetMap, Satellite, Terrain, Dark, Light, Watercolor)
+- **Project Search & Filtering**: Real-time search by project name or Boma ID
+- **Favorites System**: Save and manage favorite projects (localStorage)
+- **Responsive Design**: Mobile-first approach with full responsiveness
+- **Admin Dashboard**: Comprehensive user and project management
+- **Statistics & Analytics**: Project data visualization and insights
+- **Contact Form**: Email integration for user inquiries
+- **Performance Optimized**: Code splitting, image optimization, caching strategies
 
 ## Tech Stack
 
-- **Backend**: Flask (Python)
-- **Database**: PostgreSQL (Aiven Cloud)
-- **Authentication**: Flask-Login with password hashing
-- **Email**: Flask-Mail (for password reset)
-- **Frontend**: HTML5, CSS3, JavaScript
-- **Maps**: Leaflet.js with OpenStreetMap
-- **UI Framework**: Bootstrap 5
-- **Charts**: Chart.js
-- **Data Storage**: JSON file for projects, PostgreSQL for users
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Mapping**: Leaflet + react-leaflet
+- **Form Handling**: react-hook-form + zod validation
+- **HTTP Client**: Axios
+- **UI Components**: Custom shadcn/ui inspired components
+- **Authentication**: NextAuth (configured for integration)
 
-## Installation
+## Getting Started
 
 ### Prerequisites
 
-- Python 3.7 or higher
-- pip (Python package manager)
-- PostgreSQL database (connection string configured in app.py)
+- Node.js 18+ and npm/yarn/pnpm
+- Flask backend running on `http://localhost:5000`
 
-### Setup Steps
+### Installation
 
-1. **Clone or download this repository**
+```bash
+# Install dependencies
+npm install
+# or
+pnpm install
 
-2. **Create a virtual environment** (recommended):
-   ```bash
-   python -m venv venv
-   ```
+# Create .env.local file
+cp .env.local.example .env.local
 
-3. **Activate the virtual environment**:
-   - On Windows:
-     ```bash
-     venv\Scripts\activate
-     ```
-   - On macOS/Linux:
-     ```bash
-     source venv/bin/activate
-     ```
+# Update .env.local with your configuration
+# NEXT_PUBLIC_API_URL=http://localhost:5000
+# NEXTAUTH_SECRET=your-secret-key
+# NEXTAUTH_URL=http://localhost:3000
+```
 
-4. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+### Development
 
-5. **Configure Email (Optional, for password reset)**:
-   - Create a `.env` file in the project root
-   - Add your email configuration:
-     ```env
-     MAIL_SERVER=smtp.gmail.com
-     MAIL_PORT=587
-     MAIL_USE_TLS=true
-     MAIL_USERNAME=your-email@gmail.com
-     MAIL_PASSWORD=your-app-password
-     MAIL_DEFAULT_SENDER=noreply@kituihousing.com
-     ```
-   - For Gmail, generate an "App Password" at: https://myaccount.google.com/apppasswords
-   - **Note**: Password reset will only work if email is configured
+```bash
+npm run dev
+# or
+pnpm dev
+```
 
-6. **Run the application**:
-   ```bash
-   python app.py
-   ```
-   Or using Flask CLI:
-   ```bash
-   flask run
-   ```
-   The database tables will be automatically created on first run.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-7. **Open your browser** and navigate to:
-   ```
-   http://localhost:5000
-   ```
+### Production Build
 
-### Default Admin Account
-
-- **Username**: `admin`
-- **Password**: `admin123`
-- **Note**: Change this password after first login!
+```bash
+npm run build
+npm start
+# or
+pnpm build
+pnpm start
+```
 
 ## Project Structure
 
 ```
-kitui-housing-prototype/
-├── app.py                 # Main Flask application
-├── projects.json          # Project data (JSON format)
-├── requirements.txt       # Python dependencies
-├── README.md             # This file
-├── templates/            # Jinja2 HTML templates
-│   ├── base.html         # Base layout template
-│   ├── dashboard.html    # Main dashboard page
-│   ├── about.html        # About page
-│   ├── stats.html        # Statistics page
-│   ├── contact.html      # Contact form page
-│   ├── admin.html        # Admin panel
-│   └── 404.html          # 404 error page
-└── static/               # Static assets
-    ├── css/
-    │   └── style.css     # Custom styles
-    ├── js/
-    │   ├── map.js        # Map functionality
-    │   ├── search.js     # Search and autocomplete
-    │   └── stats.js      # Statistics charts
-    └── img/              # Image assets
+├── app/
+│   ├── layout.tsx              # Root layout with metadata
+│   ├── globals.css             # Global styles
+│   ├── page.tsx                # Home page
+│   ├── dashboard/
+│   │   └── page.tsx            # Interactive map dashboard
+│   ├── stats/
+│   │   └── page.tsx            # Statistics and analytics
+│   ├── about/
+│   │   └── page.tsx            # About page
+│   ├── contact/
+│   │   └── page.tsx            # Contact form
+│   └── admin/
+│       └── page.tsx            # Admin panel
+├── components/
+│   ├── header.tsx              # Navigation header
+│   ├── footer.tsx              # Footer
+│   ├── map-component.tsx       # Leaflet map with controls
+│   └── ui/
+│       ├── button.tsx          # Button component
+│       ├── card.tsx            # Card component
+│       ├── input.tsx           # Input field
+│       └── textarea.tsx        # Textarea field
+├── lib/
+│   ├── utils.ts                # Utility functions
+│   ├── api-client.ts           # Axios API client
+│   └── session-provider.tsx    # NextAuth provider
+├── types/
+│   └── index.ts                # TypeScript type definitions
+├── public/
+│   ├── favicon.ico
+│   ├── manifest.json
+│   └── apple-touch-icon.png
+├── package.json
+├── tsconfig.json
+├── next.config.mjs
+├── tailwind.config.ts
+└── postcss.config.js
 ```
 
-## Usage
+## Key Components
 
-### Dashboard
+### MapComponent (`components/map-component.tsx`)
 
-The main dashboard displays an interactive map with markers for each housing project. Click on a marker to view project details in a popup, or use the search bar to find specific projects.
+The heart of the dashboard. Features include:
 
-### Search
+- **Leaflet Map**: Full-featured map centered on Kitui County (-1.374, 38.010)
+- **Markers**: Color-coded by project status (Green: Completed, Orange: Ongoing, Yellow: Nearing, Gray: Planned)
+- **Popups**: Click markers to view project details
+- **Basemap Switcher**: Toggle between 6 different map styles (persists in localStorage)
+- **Responsive**: Adapts to all screen sizes
+- **Performance**: Memoized and optimized rendering
 
-Type a project name in the search bar. The autocomplete feature will suggest matching projects as you type. Click "Search" or press Enter to navigate to the project on the map.
+### Dashboard Page (`app/dashboard/page.tsx`)
 
-### Statistics
+- Sidebar with search, favorites, and project details
+- Full-height map integration
+- Mobile-responsive layout with hamburger menu
+- Real-time project filtering
+- Project selection and details panel
 
-Visit the Statistics page to view:
-- Total number of projects and units
-- Projects by status (pie chart)
-- Units distribution (bar chart)
-- Detailed project table
+### Admin Panel (`app/admin/page.tsx`)
 
-### User Accounts
+- User management with CRUD operations
+- Project management with full details
+- Statistics overview
+- Status indicators and management tools
+- Responsive table design
 
-- **Sign Up**: Create a new account at `/signup`
-- **Login**: Access admin features at `/login`
-- **Forgot Password**: Reset your password at `/forgot-password` (requires email configuration)
+## API Integration
 
-### Admin Panel
+### Backend Requirements
 
-Access the admin panel at `/admin` (requires login) to:
-- Add new projects
-- Edit existing projects
-- Delete projects
+The Flask backend must provide these endpoints:
 
-**Default admin credentials**:
-- Username: `admin`
-- Password: `admin123`
-- **Note**: Change this password after first login!
+```
+GET    /api/projects              - Get all projects
+POST   /login                      - Login endpoint
+POST   /signup                     - User signup
+POST   /contact                    - Contact form
+POST   /forgot-password            - Password reset
+GET    /api/admin/users           - Get all users (admin only)
+POST   /api/admin/users           - Create user (admin only)
+PUT    /api/admin/users/<id>      - Update user (admin only)
+DELETE /api/admin/users/<id>      - Delete user (admin only)
+GET    /api/admin/stats           - Admin statistics (admin only)
+```
 
-## Data Format
+### API Client (`lib/api-client.ts`)
 
-Projects are stored in `projects.json` with the following structure:
+Pre-configured Axios client with automatic CSRF token handling, credential inclusion for cookies, and error interceptors.
 
-```json
+## Data Models
+
+### Project
+```typescript
 {
-  "boma_id": "78",
-  "name": "Project Name",
-  "status": "ongoing",
-  "units": 500,
-  "image": "https://example.com/image.jpg",
-  "lat": -1.374,
-  "lon": 38.010,
-  "description": "Project description",
-  "unit_types": "Studio, 1-3 Bedroom",
-  "price_start": 640000
+  name: string
+  boma_id: string
+  lat: number
+  lon: number
+  status: 'completed' | 'ongoing' | 'nearing completion' | 'planned'
+  units: number
+  unit_types?: string
+  price_start?: number
+  description: string
+  image?: string
 }
 ```
 
-## Development
+## Responsive Design
 
-### Adding New Projects
+- **Mobile** (< 768px): Full-width maps, sidebar as drawer, hamburger menu
+- **Tablet** (768-1024px): Flexible sidebar, partial width
+- **Desktop** (> 1024px): Fixed sidebar (25% width), map (75% width)
 
-1. Edit `projects.json` directly, or
-2. Use the Admin Panel at `/admin`
+## Environment Variables
 
-### Customization
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000
+NEXTAUTH_SECRET=your-secret-key-change-in-production
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXTAUTH_URL=http://localhost:3000
+```
 
-- **Styling**: Modify `static/css/style.css`
-- **Map Settings**: Adjust in `static/js/map.js`
-- **Routes**: Add new routes in `app.py`
+## Deployment
 
-## Future Enhancements
+### Vercel (Recommended)
 
-- Image upload functionality
-- Export to CSV/PDF
-- Real-time data updates
-- API endpoints for external access
-- User profile management
-- Email verification on signup
+```bash
+git push origin main
+vercel
+```
 
-## Security Notes
+Set environment variables in Vercel dashboard under Settings > Environment Variables.
 
-⚠️ **Important**: This is a prototype application. For production use:
+## Browser Support
 
-- Change the admin password in `app.py`
-- Implement proper authentication (Flask-Login)
-- Use environment variables for sensitive data
-- Add input validation and sanitization
-- Implement CSRF protection
-- Use HTTPS
-- Add rate limiting
-
-## License
-
-This project is open source and available for educational and development purposes.
-
-## Acknowledgments
-
-- Inspired by the Boma Yangu platform
-- Uses OpenStreetMap for map data
-- Built with Flask, Leaflet.js, and Bootstrap
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
+- Mobile browsers (iOS Safari, Chrome Mobile)
 
 ## Support
 
-For questions or feedback, use the Contact form in the application or open an issue in the repository.
+For issues and questions:
+- Email: support@kituihousing.com
+- GitHub Issues: [project repository]
+
+## License
+
+Licensed under the MIT License - see LICENSE file for details
 
 ---
 
-**Built with ❤️ for Kitui County**
+**Built with Next.js for Kitui County**
