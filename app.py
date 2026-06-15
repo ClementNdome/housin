@@ -63,7 +63,7 @@ MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB in bytes
 app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
 
 # Image database connection string (separate from main database)
-IMAGE_DATABASE_URL = os.getenv('IMAGE_DATABASE_URL', 'postgresql+asyncpg://user_thirsty_chandrasekhar:NNFksljwaeuI1jKlOh1eroTIkzeSFaRX@34.32.192.66:5432/thirsty_chandrasekhar')
+IMAGE_DATABASE_URL = os.getenv('IMAGE_DATABASE_URL')
 
 # Convert asyncpg connection string format to psycopg2 format if needed
 if IMAGE_DATABASE_URL.startswith('postgresql+asyncpg://'):
@@ -1486,6 +1486,7 @@ def admin():
         
         try:
             if action == 'add':
+                
                 # Validate and sanitize inputs
                 name = request.form.get('name', '').strip()
                 if not name or len(name) < 2:
@@ -1579,7 +1580,34 @@ def admin():
                 except Exception as e:
                     logger.error(f'Error adding project: {e}')
                     flash(f'Error adding project: {str(e)}', 'danger')
-            
+
+                
+                external_link = request.form.get('external_link', '').strip()
+                if external_link:
+                    # Validate URL format
+                    if not (external_link.startswith('http://') or external_link.startswith('https://')):
+                        flash('External link must be a valid URL (http:// or https://).', 'danger')
+                        return redirect(url_for('admin'))
+                    if len(external_link) > 500:
+                        flash('External link is too long.', 'danger')
+                        return redirect(url_for('admin'))
+
+                # Add project to database with external_link
+                try:
+                    project_id = add_project_to_db(
+                        boma_id, name, status, units, image, lat, lon, 
+                        description, unit_types, price_start, external_link
+                    )
+
+                    log_audit_event(current_user.id, 'CREATE', 'project', name, f'New project added (id: {project_id})')
+                    logger.info(f'Project created: {name} (id: {project_id}) by user: {current_user.username}')
+                    flash(f'Project "{name}" added successfully!', 'success')
+                except Exception as e:
+                    logger.error(f'Error adding project: {e}')
+                    flash(f'Error adding project: {str(e)}', 'danger')
+
+
+
             elif action == 'edit':
                 try:
                     project_id = int(request.form.get('project_id'))
@@ -1714,6 +1742,29 @@ def admin():
                 except Exception as e:
                     logger.error(f'Error updating project: {e}')
                     flash(f'Error updating project: {str(e)}', 'danger')
+
+                    external_link = request.form.get('external_link', '').strip()
+                    if external_link:
+                        # Validate URL format
+                        if not (external_link.startswith('http://') or external_link.startswith('https://')):
+                            flash('External link must be a valid URL (http:// or https://).', 'danger')
+                            return redirect(url_for('admin'))
+                        if len(external_link) > 500:
+                            flash('External link is too long.', 'danger')
+                            return redirect(url_for('admin'))
+                    
+                    # Update project in database with external_link
+                    try:
+                        update_project_in_db(
+                            project_id, boma_id, name, status, units, image, lat, lon, 
+                            description, unit_types, price_start, external_link
+                        )
+                        log_audit_event(current_user.id, 'UPDATE', 'project', name, f'Updated from "{old_name}"')
+                        logger.info(f'Project updated: {name} (was: {old_name}, id: {project_id}) by user: {current_user.username}')
+                        flash(f'Project "{name}" updated successfully!', 'success')
+                    except Exception as e:
+                        logger.error(f'Error updating project: {e}')
+                        flash(f'Error updating project: {str(e)}', 'danger')
             
             elif action == 'delete':
                 try:
